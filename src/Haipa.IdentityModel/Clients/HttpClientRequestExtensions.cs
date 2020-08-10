@@ -15,10 +15,10 @@ namespace Haipa.IdentityModel.Clients
 {
     public static class HttpClientExtensions
     {
-        public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient, string clientName, X509Certificate2 clientCertificate, IEnumerable<string> scopes = null)
+        public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient, string clientName, X509Certificate2 clientCertificate, string audience, IEnumerable<string> scopes = null)
         {
 
-            var jwt = CreateClientAuthJwt("http://localhost/connect/token", clientName, clientCertificate);
+            var jwt = CreateClientAuthJwt(audience, clientName, clientCertificate);
 
 
             var properties = new Dictionary<string, string>
