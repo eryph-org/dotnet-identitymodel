@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Haipa.IdentityModel.Clients
 {
-    internal static class HttpClientExtensions
+    public static class HttpClientExtensions
     {
         public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient, string clientName, X509Certificate2 clientCertificate, IEnumerable<string> scopes = null)
         {
