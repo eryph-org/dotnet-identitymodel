@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -13,7 +14,7 @@ namespace Haipa.IdentityModel.Clients
 {
     internal static class HttpClientExtensions
     {
-        public static async Task<string> GetClientAccessToken(this HttpClient httpClient, string clientName, X509Certificate2 clientCertificate, string scopes)
+        public static async Task<string> GetClientAccessToken(this HttpClient httpClient, string clientName, X509Certificate2 clientCertificate, IEnumerable<string> scopes)
         {
 
             var request = new HttpRequestMessage(HttpMethod.Post, "connect/token");
@@ -25,8 +26,8 @@ namespace Haipa.IdentityModel.Clients
                 ["client_id"] = clientName,
                 ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 ["client_assertion"] = jwt,
-                ["scopes"] = scopes
-            });
+                ["scopes"] = string.Join(",", scopes.Select(x => x))
+        });
 
             var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
             var content = await response.Content.ReadAsStringAsync();
