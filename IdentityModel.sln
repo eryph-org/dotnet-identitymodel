@@ -9,6 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Haipa.IdentityModel.Clients
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E825A50-D7E6-4836-94A5-87370BC3085A}"
 	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
 		GitVersion.yml = GitVersion.yml
 	EndProjectSection
 EndProject
