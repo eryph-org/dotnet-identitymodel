@@ -54,7 +54,7 @@ namespace Haipa.IdentityModel.Clients
             var tokenResponse = new AccessTokenResponse
             {
                 AccessToken = accessToken?.ToString(),
-                ExpiresOn = expiresIn == null ? default : DateTimeOffset.UtcNow.AddSeconds(expiresIn.ToObject<int>()),
+                ExpiresOn = expiresIn == null ? default : DateTimeOffset.Now.AddSeconds(expiresIn.ToObject<int>()),
                 Scopes = scopesResponse?.ToString().Split(',')
             };
 
