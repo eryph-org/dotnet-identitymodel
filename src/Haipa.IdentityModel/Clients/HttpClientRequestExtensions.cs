@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
@@ -15,10 +15,10 @@ namespace Haipa.IdentityModel.Clients
 {
     public static class HttpClientExtensions
     {
-        public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient, string clientName, X509Certificate2 clientCertificate, string audience, IEnumerable<string> scopes = null)
+        public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient, string clientName, RSAParameters rsaParameters, IEnumerable<string> scopes = null)
         {
-
-            var jwt = CreateClientAuthJwt(audience, clientName, clientCertificate);
+            var audience =  httpClient.BaseAddress + "connect/token";
+            var jwt = CreateClientAuthJwt(audience, clientName, rsaParameters);
 
 
             var properties = new Dictionary<string, string>
@@ -54,7 +54,7 @@ namespace Haipa.IdentityModel.Clients
             var tokenResponse = new AccessTokenResponse
             {
                 AccessToken = accessToken?.ToString(),
-                ExpiresOn = expiresIn == null ? default : DateTimeOffset.Now.AddSeconds(expiresIn.ToObject<int>()),
+                ExpiresOn = expiresIn == null ? default : DateTimeOffset.UtcNow.AddSeconds(expiresIn.ToObject<int>()),
                 Scopes = scopesResponse?.ToString().Split(',')
             };
 
@@ -62,21 +62,21 @@ namespace Haipa.IdentityModel.Clients
             return tokenResponse;
         }
 
-        private static string CreateClientAuthJwt(string audience, string issuerName, X509Certificate2 issuerCert)
+        private static string CreateClientAuthJwt(string audience, string clientName, RSAParameters rsaParameters)
         {
             // set exp to 5 minutes
             var tokenHandler = new JwtSecurityTokenHandler { TokenLifetimeInMinutes = 5 };
             var securityToken = tokenHandler.CreateJwtSecurityToken(
                 // iss must be the client_id of our application
-                issuer: issuerName,
+                issuer: clientName,
                 // aud must be the identity provider (token endpoint)
                 audience: audience,
                 // sub must be the client_id of our application
                 subject: new ClaimsIdentity(
-                    new List<Claim> { new Claim("sub", issuerName) }),
+                    new List<Claim> { new Claim("sub", clientName) }),
                 // sign with the private key (using RS256 for IdentityServer)
                 signingCredentials: new SigningCredentials(
-                    new X509SecurityKey(issuerCert), "RS256")
+                    new RsaSecurityKey(rsaParameters), "RS256")
             );
 
             return tokenHandler.WriteToken(securityToken);
