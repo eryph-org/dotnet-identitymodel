@@ -23,7 +23,7 @@ All platforms and runtimes (.NET Framework / .NET Core / all .NET supported oper
 
 ## Getting started
 
-The packages for this library are available as CI build on the dbosoft public nuget feed:
+The packages of this library (**Haipa.IdentityModel** and **Haipa.IdentityModel.Client**) are currently only available as CI build on the dbosoft public nuget feed:
 
 https://dev.azure.com/dbosoft/public/_packaging?_a=feed&feed=Public
 
