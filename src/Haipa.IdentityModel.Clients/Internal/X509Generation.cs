@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -9,7 +8,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using BigInteger = Org.BouncyCastle.Math.BigInteger;
 
-namespace Haipa.IdentityModel.Clients.Cryptography
+namespace Haipa.IdentityModel.Clients.Internal
 {
     internal static class X509Generation
     {
@@ -38,7 +37,7 @@ namespace Haipa.IdentityModel.Clients.Cryptography
         ///         Default is EmailProtection
         ///     </remarks>
         /// </summary>
-        public static (X509Certificate Certificate, AsymmetricCipherKeyPair KeyPair) GenerateCertificate(string subjectName)
+        public static (X509Certificate Certificate, AsymmetricCipherKeyPair KeyPair) GenerateSelfSignedCertificate(string subjectName)
         {
             var kpGenerator = new RsaKeyPairGenerator();
 
@@ -72,52 +71,6 @@ namespace Haipa.IdentityModel.Clients.Cryptography
         }
 
 
-        private sealed class CryptoApiRandomGenerator : IRandomGenerator
-        {
-            private readonly RandomNumberGenerator _rndProv;
-
-            public CryptoApiRandomGenerator() : this(new RNGCryptoServiceProvider())
-            {
-            }
-
-            private CryptoApiRandomGenerator(RandomNumberGenerator rng)
-            {
-                _rndProv = rng;
-            }
-
-            public void AddSeedMaterial(byte[] seed)
-            {
-            }
-
-            public void AddSeedMaterial(long seed)
-            {
-            }
-
-            public void NextBytes(byte[] bytes)
-            {
-                _rndProv.GetBytes(bytes);
-            }
-
-            public void NextBytes(byte[] bytes, int start, int len)
-            {
-                if (start < 0)
-                {
-                    throw new ArgumentException("Start offset cannot be negative", nameof(start));
-                }
-                if (bytes.Length < start + len)
-                {
-                    throw new ArgumentException("Byte array too small for requested offset and length");
-                }
-                if (bytes.Length == len && start == 0)
-                {
-                    NextBytes(bytes);
-                    return;
-                }
-                var numArray = new byte[len];
-                NextBytes(numArray);
-                Array.Copy(numArray, 0, bytes, start, len);
-            }
-        }
     }
 
 

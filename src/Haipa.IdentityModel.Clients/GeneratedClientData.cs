@@ -3,18 +3,13 @@ using Org.BouncyCastle.X509;
 
 namespace Haipa.IdentityModel.Clients
 {
-    public class GeneratedClientData
+    public class GeneratedClientData : ClientData
     {
-        public string Id { get;  }
         public X509Certificate Certificate { get; }
-        public AsymmetricCipherKeyPair KeyPair { get; }
 
-        public GeneratedClientData(string id, X509Certificate certificate, AsymmetricCipherKeyPair keyPair)
+        public GeneratedClientData(string clientName, X509Certificate certificate, AsymmetricCipherKeyPair keyPair) : base(clientName, keyPair)
         {
-            Id = id;
-
             Certificate = certificate;
-            KeyPair = keyPair;
         }
     }
 }
