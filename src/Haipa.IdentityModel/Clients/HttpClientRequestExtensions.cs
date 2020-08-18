@@ -16,7 +16,11 @@ namespace Haipa.IdentityModel.Clients
     {
         public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient, string clientName, RSAParameters rsaParameters, IEnumerable<string> scopes = null)
         {
-            var audience =  httpClient.BaseAddress + "connect/token";
+            var fullAddress = httpClient.BaseAddress;
+            if(fullAddress.PathAndQuery!="" && !fullAddress.PathAndQuery.EndsWith("/"))
+                fullAddress = new Uri(fullAddress+"/");
+
+            var audience = fullAddress + "connect/token";
             var jwt = CreateClientAssertionJwt(audience, clientName, rsaParameters);
 
 
@@ -33,7 +37,7 @@ namespace Haipa.IdentityModel.Clients
             if(scopesArray.Any())
                 properties.Add("scopes", string.Join(",", scopesArray.Select(x => x)));
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "connect/token")
+            var request = new HttpRequestMessage(HttpMethod.Post, audience)
             {
                 Content = new FormUrlEncodedContent(properties)
             };

@@ -71,7 +71,7 @@ namespace Haipa.IdentityModel.Tests
                 })
                 .Verifiable();
 
-            var httpClient = new HttpClient(httpHandlerMock.Object) {BaseAddress = new Uri("http://localhost")};
+            var httpClient = new HttpClient(httpHandlerMock.Object) {BaseAddress = new Uri("http://localhost/identity")};
 
 
             var response = await httpClient.GetClientAccessToken("test-client", GetRSAParameters());
