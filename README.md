@@ -3,6 +3,8 @@ Haipa .NET library for claims-based identity and client generation
 
 **NOT ready for production use**
 
+[![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/haipa.dotnet-identitymodel?branchName=master)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=master)
+
 ## Description
 
 **Features**:
