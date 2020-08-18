@@ -1,7 +1,7 @@
 # Haipa Identity Model
 Haipa .NET library for claims-based identity and client generation
 
-** NOT ready for production use **
+**NOT ready for production use**
 
 ## Description
 
