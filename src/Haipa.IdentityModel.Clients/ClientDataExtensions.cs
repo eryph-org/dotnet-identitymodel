@@ -8,18 +8,24 @@ namespace Haipa.IdentityModel.Clients
 {
     public static class ClientDataExtensions
     {
-        public static Task<AccessTokenResponse> GetAccessToken(this ClientData clientData, string identityEndpoint, HttpMessageHandler handler = null)
+        public static Task<AccessTokenResponse> GetAccessToken(this ClientData clientData, string identityEndpoint, HttpClient httpClient = null)
         {
-            var httpClient = handler == null
-                ? new HttpClient()
-                : new HttpClient(handler);
+            var disposeClient = httpClient == null;
+            httpClient ??= new HttpClient();
 
-            httpClient.BaseAddress = new Uri(identityEndpoint);
+            try
+            {
+                httpClient.BaseAddress = new Uri(identityEndpoint);
 
-            return httpClient.GetClientAccessToken(
-                clientData.ClientName,
-                clientData.KeyPair.ToRSAParameters());
-
+                return httpClient.GetClientAccessToken(
+                    clientData.ClientName,
+                    clientData.KeyPair.ToRSAParameters());
+            }
+            finally
+            {
+                if(disposeClient)
+                    httpClient?.Dispose();
+            }
         }
     }
 }
