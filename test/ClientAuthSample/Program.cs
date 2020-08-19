@@ -17,12 +17,7 @@ namespace ClientAuthSample
         {
             var clientLockup = new ClientLookup(new DefaultEnvironment());
             var result = clientLockup.GetClient();
-            var httpClient = new HttpClient{ BaseAddress = new Uri(result.IdentityEndpoint) };
-
-            var token = await httpClient.GetClientAccessToken(
-                    result.Client.ClientName, 
-                    result.Client.KeyPair.ToRSAParameters())
-                .ConfigureAwait(false);
+            var token = await result.Client.GetAccessToken(result.IdentityEndpoint);
 
             Console.WriteLine(token.AccessToken);
         }
