@@ -10,6 +10,11 @@ namespace Haipa.IdentityModel.Clients
     {
         public static Task<AccessTokenResponse> GetAccessToken(this ClientData clientData, string identityEndpoint, HttpClient httpClient = null)
         {
+            return clientData.GetAccessToken(identityEndpoint, null, httpClient);
+        }
+
+        public static Task<AccessTokenResponse> GetAccessToken(this ClientData clientData, string identityEndpoint, IEnumerable<string> scopes, HttpClient httpClient = null)
+        {
             var disposeClient = httpClient == null;
             httpClient ??= new HttpClient();
 
@@ -19,7 +24,7 @@ namespace Haipa.IdentityModel.Clients
 
                 return httpClient.GetClientAccessToken(
                     clientData.ClientName,
-                    clientData.KeyPair.ToRSAParameters());
+                    clientData.KeyPair.ToRSAParameters(), scopes);
             }
             finally
             {
