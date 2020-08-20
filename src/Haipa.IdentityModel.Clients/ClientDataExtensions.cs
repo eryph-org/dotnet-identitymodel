@@ -15,22 +15,21 @@ namespace Haipa.IdentityModel.Clients
 
         public static Task<AccessTokenResponse> GetAccessToken(this ClientData clientData, string identityEndpoint, IEnumerable<string> scopes, HttpClient httpClient = null)
         {
-            var disposeClient = httpClient == null;
+            var disposeHttpClient = httpClient == null;
             httpClient ??= new HttpClient();
 
-            try
-            {
-                httpClient.BaseAddress = new Uri(identityEndpoint);
+            httpClient.BaseAddress = new Uri(identityEndpoint);
 
+            if (!disposeHttpClient)
                 return httpClient.GetClientAccessToken(
                     clientData.ClientName,
                     clientData.KeyPair.ToRSAParameters(), scopes);
-            }
-            finally
-            {
-                if(disposeClient)
-                    httpClient?.Dispose();
-            }
+
+            using(httpClient)
+                return httpClient.GetClientAccessToken(
+                    clientData.ClientName,
+                    clientData.KeyPair.ToRSAParameters(), scopes);
+
         }
     }
 }

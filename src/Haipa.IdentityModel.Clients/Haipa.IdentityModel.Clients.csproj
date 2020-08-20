@@ -6,7 +6,7 @@
     <Authors>dbosoft GmbH and Haipa contributors</Authors>
     <Company>dbosoft GmbH</Company>
     <Product>Haipa</Product>
-    <Description>Haipa .NET library for haipa client generation.</Description>
+    <Description>Haipa .NET library for authentication with haipa clients.</Description>
     <Copyright>dbosoft GmbH. All rights reserved.</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/haipa/dotnet-identitymodel</RepositoryUrl>
