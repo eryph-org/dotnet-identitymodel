@@ -1,26 +1,25 @@
-﻿using Org.BouncyCastle.Crypto;
+﻿using System;
+using System.Runtime.Serialization;
+using Org.BouncyCastle.Crypto;
 
 namespace Haipa.IdentityModel.Clients
 {
-    public class ClientData
+    public sealed class ClientData
     {
-        public ClientData(string clientName,  AsymmetricCipherKeyPair keyPair)
+        public ClientData(string clientName, AsymmetricCipherKeyPair keyPair, Uri identityProvider)
         {
             ClientName = clientName;
             KeyPair = keyPair;
+            IdentityProvider = identityProvider;
         }
 
-        public string ClientName { get;  }
+        [DataMember]
+        public string ClientName { get; }
+
+        [DataMember]
         public AsymmetricCipherKeyPair KeyPair { get; }
 
-    }
-
-    public class ClientLookupResult
-    {
-        public bool IsHaipaZero { get; set; }
-        public ClientData Client { get; set; }
-        public string IdentityEndpoint { get; set; }
-        public string ApiEndpoint { get; set; }
-
+        [DataMember]
+        public Uri IdentityProvider { get; }
     }
 }

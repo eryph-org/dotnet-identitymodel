@@ -3,11 +3,13 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using Haipa.IdentityModel.Clients.Internal;
+using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 
 namespace Haipa.IdentityModel.Clients
 {
-    public class ClientLookup
+    [PublicAPI]
+    public sealed class ClientLookup
     {
         private readonly IEnvironment _systemEnvironment;
 
@@ -17,24 +19,21 @@ namespace Haipa.IdentityModel.Clients
         }
 
         [ExcludeFromCodeCoverage]
-        public ClientLookupResult GetClient()
+        public ClientData GetClient()
         {
-            return GetSystemClient();
+            throw new NotImplementedException();
         }
 
-        public ClientLookupResult GetSystemClient()
+        public ClientData GetSystemClient()
         {
             if (!_systemEnvironment.IsOsPlatform(OSPlatform.Windows) &&
                 !_systemEnvironment.IsOsPlatform(OSPlatform.Linux))
-            {
                 throw new InvalidOperationException("The system client exists only on Windows and Linux systems.");
-            }
 
             if (_systemEnvironment.IsOsPlatform(OSPlatform.Windows) && !_systemEnvironment.IsWindowsAdminUser)
-            {
-                throw new InvalidOperationException("This application has to be started as admin to access the Haipa system client. ");
-            }
-            
+                throw new InvalidOperationException(
+                    "This application has to be started as admin to access the Haipa system client. ");
+
             var applicationDataPath =
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "haipa");
 
@@ -44,6 +43,7 @@ namespace Haipa.IdentityModel.Clients
             var privateKey = PrivateKeyFile.Read(privateKeyPath, _systemEnvironment.FileSystem);
 
             var isHaipaZero = false;
+
             string endpoint;
             try
             {
@@ -56,33 +56,24 @@ namespace Haipa.IdentityModel.Clients
             }
 
             if (isHaipaZero)
-            {
-                return new ClientLookupResult
-                {
-                    IsHaipaZero = true,
-                    ApiEndpoint = new Uri(new Uri(endpoint), "api").ToString(),
-                    IdentityEndpoint = new Uri(new Uri(endpoint), "identity").ToString(),
-                    Client = new ClientData("system-client", privateKey)
-                };
-            }
+                return new ClientData("system-client",
+                    privateKey,
+                    new Uri(new Uri(endpoint),
+                        "identity"));
 
-            return new ClientLookupResult
-            {
-                IsHaipaZero = false,
-                ApiEndpoint = null,
-                IdentityEndpoint = endpoint,
-                Client = new ClientData("system-client", privateKey)
-            };
+            return new ClientData("system-client",
+                privateKey,
+                new Uri(endpoint));
         }
 
-        public string GetLocalIdentityEndpoint(bool forHaipaZero=false)
+        public string GetLocalIdentityEndpoint(bool forHaipaZero = false)
         {
-            
             var applicationDataPath =
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "haipa");
 
             var moduleName = forHaipaZero ? "zero" : "identity";
-            var infoFilePath = Path.Combine(Path.Combine(applicationDataPath, $@"{moduleName}{Path.DirectorySeparatorChar}.run_info"));
+            var infoFilePath = Path.Combine(Path.Combine(applicationDataPath,
+                $@"{moduleName}{Path.DirectorySeparatorChar}.run_info"));
 
             JObject processInfo;
             try
@@ -93,19 +84,15 @@ namespace Haipa.IdentityModel.Clients
             }
             catch
             {
-                if(forHaipaZero)
+                if (forHaipaZero)
                     throw new InvalidOperationException("process info for haipa zero not found.");
 
                 throw new InvalidOperationException("process info for haipa identity not found.");
-
             }
 
             var processId = processInfo["process_id"];
 
-            if (_systemEnvironment.IsProcessRunning(processId.ToObject<int>()))
-            {
-               return processInfo["url"].ToString();
-            }
+            if (_systemEnvironment.IsProcessRunning(processId.ToObject<int>())) return processInfo["url"].ToString();
 
 
             if (forHaipaZero)
