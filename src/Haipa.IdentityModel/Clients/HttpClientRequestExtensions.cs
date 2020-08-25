@@ -79,13 +79,18 @@ namespace Haipa.IdentityModel.Clients
             // set exp to 5 minutes
             var tokenHandler = new JwtSecurityTokenHandler { TokenLifetimeInMinutes = 5 };
             var securityToken = tokenHandler.CreateJwtSecurityToken(
+                
                 // iss must be the client_id of our application
                 issuer: clientName,
                 // aud must be the identity provider (token endpoint)
                 audience: audience,
                 // sub must be the client_id of our application
                 subject: new ClaimsIdentity(
-                    new List<Claim> { new Claim("sub", clientName) }),
+                    new List<Claim>
+                    {
+                        new Claim("sub", clientName),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    }),
                 // sign with the private key (using RS256 for IdentityServer)
                 signingCredentials: new SigningCredentials(
                     new RsaSecurityKey(rsaParameters), "RS256")
