@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Haipa.IdentityModel.Clients
@@ -13,7 +12,7 @@ namespace Haipa.IdentityModel.Clients
             return clientData.GetAccessToken(identityEndpoint, null, httpClient);
         }
 
-        public static Task<AccessTokenResponse> GetAccessToken(this ClientData clientData, string identityEndpoint, IEnumerable<string> scopes, HttpClient httpClient = null)
+        public static async Task<AccessTokenResponse> GetAccessToken(this ClientData clientData, string identityEndpoint, IEnumerable<string> scopes, HttpClient httpClient = null)
         {
             var disposeHttpClient = httpClient == null;
             httpClient ??= new HttpClient();
@@ -21,15 +20,17 @@ namespace Haipa.IdentityModel.Clients
             httpClient.BaseAddress = new Uri(identityEndpoint);
 
             if (!disposeHttpClient)
-                return httpClient.GetClientAccessToken(
+                return await httpClient.GetClientAccessToken(
                     clientData.ClientName,
-                    clientData.KeyPair.ToRSAParameters(), scopes);
+                    clientData.KeyPair.ToRSAParameters(), scopes).ConfigureAwait(false);
 
-            using(httpClient)
-                return httpClient.GetClientAccessToken(
+            using (httpClient)
+            {
+                var result = await httpClient.GetClientAccessToken(
                     clientData.ClientName,
-                    clientData.KeyPair.ToRSAParameters(), scopes);
-
+                    clientData.KeyPair.ToRSAParameters(), scopes).ConfigureAwait(false);
+                return result;
+            }
         }
     }
 }
