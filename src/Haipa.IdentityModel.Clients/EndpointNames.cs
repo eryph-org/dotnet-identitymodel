@@ -5,7 +5,7 @@ namespace Haipa.IdentityModel.Clients
     [PublicAPI]
     public static class EndpointNames
     {
-        public const string Identity = nameof(Identity);
-        public const string Compute = nameof(Compute);
+        public const string Identity = "identity";
+        public const string Compute = "compute";
     }
 }

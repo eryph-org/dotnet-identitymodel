@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using Haipa.IdentityModel.Clients.Internal;
@@ -13,17 +12,41 @@ namespace Haipa.IdentityModel.Clients
     {
         private readonly IEnvironment _systemEnvironment;
 
-        public ClientLookup(IEnvironment systemEnvironment)
+        public ClientLookup(IEnvironment systemEnvironment = null)
         {
-            _systemEnvironment = systemEnvironment;
+            _systemEnvironment = systemEnvironment ?? new DefaultEnvironment();
         }
 
-        [ExcludeFromCodeCoverage]
-        public ClientData GetClient()
+        [CanBeNull]
+        public ClientData GetClient([NotNull] string configName = "default")
         {
-            throw new NotImplementedException();
+            if (configName == null) throw new ArgumentNullException(nameof(configName));
+            return GetDefaultClient(configName)?? GetSystemClient();
         }
 
+        public ClientData GetDefaultClient([NotNull] string configName = "default")
+        {
+            if (configName == null) throw new ArgumentNullException(nameof(configName));
+            return new ConfigStoresReader(_systemEnvironment, configName).GetDefaultClient();
+        }
+
+        [CanBeNull]
+        public ClientData GetClientByName([NotNull] string clientName, [NotNull] string configName = "default")
+        {
+            if (clientName == null) throw new ArgumentNullException(nameof(clientName));
+            if (configName == null) throw new ArgumentNullException(nameof(configName));
+            return new ConfigStoresReader(_systemEnvironment, configName).GetClientByName(clientName);
+        }
+
+        [CanBeNull]
+        public ClientData GetClientById([NotNull] string clientId, [NotNull] string configName = "default")
+        {
+            if (clientId == null) throw new ArgumentNullException(nameof(clientId));
+            if (configName == null) throw new ArgumentNullException(nameof(configName));
+            return new ConfigStoresReader(_systemEnvironment, configName).GetClientById(clientId);
+        }
+
+        [CanBeNull]
         public ClientData GetSystemClient()
         {
             if (!_systemEnvironment.IsOsPlatform(OSPlatform.Windows) &&
@@ -56,17 +79,17 @@ namespace Haipa.IdentityModel.Clients
             }
 
             if (isHaipaZero)
-                return new ClientData("system-client",
+                return new ClientData("system-client", null,
                     privateKey,
                     new Uri(new Uri(endpoint),
                         "identity"));
 
-            return new ClientData("system-client",
+            return new ClientData("system-client", null,
                 privateKey,
                 new Uri(endpoint));
         }
 
-        public string GetLocalIdentityEndpoint(bool forHaipaZero = false)
+        private string GetLocalIdentityEndpoint(bool forHaipaZero = false)
         {
             var applicationDataPath =
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "haipa");

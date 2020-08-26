@@ -11,10 +11,19 @@ namespace ClientAuthSample
         private static async Task Main()
         {
             var clientLockup = new ClientLookup(new DefaultEnvironment());
-            var client = clientLockup.GetClient();
-            var token = await client.GetAccessToken();
 
-            Console.WriteLine(token.AccessToken);
+            var client = clientLockup.GetDefaultClient("zero");
+            
+            if (client != null)
+            {
+                var token = await client.GetAccessToken();
+
+                Console.WriteLine(token.AccessToken);
+            }
+            else
+            {
+                Console.WriteLine("could not find any Haipa client");
+            }
         }
     }
 }

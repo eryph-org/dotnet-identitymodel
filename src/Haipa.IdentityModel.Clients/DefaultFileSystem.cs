@@ -20,5 +20,20 @@ namespace Haipa.IdentityModel.Clients
         {
             return File.Exists(filepath);
         }
+
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(path);
+        }
+
+        public void CreateDirectory(string path)
+        {
+            Directory.CreateDirectory(path);
+        }
+
+        public string GetCurrentDirectory()
+        {
+            return Directory.GetCurrentDirectory();
+        }
     }
 }
