@@ -74,6 +74,9 @@ namespace Haipa.IdentityModel.Clients
         {
             lock (_syncRoot)
             {
+                if (!_environment.FileSystem.DirectoryExists(StorePath))
+                    Directory.CreateDirectory(StorePath);
+
                 var configFileName = Path.Combine(StorePath, $"{_configName}.config");
 
                 var settingsJson = JsonConvert.SerializeObject(settings, Formatting.Indented, new JsonSerializerSettings
@@ -134,6 +137,7 @@ namespace Haipa.IdentityModel.Clients
                 throw new InvalidOperationException($"This client has been issued by identity provider '{client.IdentityProvider}', but the current configuration uses the provider '{currentEndpoint}'.");
 
             var privatePath = Path.Combine(StorePath, "private");
+
             var privateKeyPath = Path.Combine(privatePath, $"{client.Id}.key");
             if (!_environment.FileSystem.DirectoryExists(privatePath))
                 _environment.FileSystem.CreateDirectory(privatePath);
