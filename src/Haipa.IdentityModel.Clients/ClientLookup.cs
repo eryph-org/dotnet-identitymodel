@@ -24,10 +24,19 @@ namespace Haipa.IdentityModel.Clients
             return GetDefaultClient(configName)?? GetSystemClient();
         }
 
+        [CanBeNull]
         public ClientData GetDefaultClient([NotNull] string configName = "default")
         {
             if (configName == null) throw new ArgumentNullException(nameof(configName));
-            return new ConfigStoresReader(_systemEnvironment, configName).GetDefaultClient();
+
+            try
+            {
+                return new ConfigStoresReader(_systemEnvironment, configName).GetDefaultClient();
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
         }
 
         [CanBeNull]
@@ -35,7 +44,16 @@ namespace Haipa.IdentityModel.Clients
         {
             if (clientName == null) throw new ArgumentNullException(nameof(clientName));
             if (configName == null) throw new ArgumentNullException(nameof(configName));
-            return new ConfigStoresReader(_systemEnvironment, configName).GetClientByName(clientName);
+
+            try
+            {
+
+                return new ConfigStoresReader(_systemEnvironment, configName).GetClientByName(clientName);
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
         }
 
         [CanBeNull]
@@ -43,7 +61,14 @@ namespace Haipa.IdentityModel.Clients
         {
             if (clientId == null) throw new ArgumentNullException(nameof(clientId));
             if (configName == null) throw new ArgumentNullException(nameof(configName));
-            return new ConfigStoresReader(_systemEnvironment, configName).GetClientById(clientId);
+
+            try{
+                return new ConfigStoresReader(_systemEnvironment, configName).GetClientById(clientId);
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
         }
 
         [CanBeNull]
