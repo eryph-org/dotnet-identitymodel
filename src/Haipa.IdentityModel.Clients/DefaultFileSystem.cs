@@ -8,7 +8,7 @@ namespace Haipa.IdentityModel.Clients
     {
         public TextReader OpenText(string filepath)
         {
-            return File.OpenText(filepath);
+            return new StreamReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
         }
 
         public TextWriter CreateText(string filepath)

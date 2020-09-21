@@ -33,7 +33,7 @@ namespace IdentityModel.Clients.Tests
             ))).Returns(() =>  new StringReader(TestData.PrivateKeyFileString));
 
 
-            var configStore = ConfigStore.GetDefaultStore(environmentMock.Object, ConfigStoreContent.Clients);
+            var configStore = ConfigStore.GetStore(ConfigStoreLocation.CurrentDirectory, environmentMock.Object);
             var clientIds = configStore.GetClients().Select(x=>x.Id).ToArray();
 
             Assert.Contains("id-1", clientIds);

@@ -12,7 +12,7 @@ namespace IdentityModel.Clients.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void GetSystemClient_throws_if_process_not_running(bool forHaipaZero)
+        public void GetSystemClient_returns_null_if_process_not_running(bool forHaipaZero)
         {
             var environmentMock = new Mock<IEnvironment>(MockBehavior.Strict);
             var filesystemMock = SetupEnvironmentAndFileSystemWithClientKey(environmentMock);
@@ -23,36 +23,34 @@ namespace IdentityModel.Clients.Tests
                 .Returns(new StringReader("{\"process_id\" : 100, \"url\" : \"http://haipa.io\"}"));
 
 
-            environmentMock.Setup(x => x.IsProcessRunning(100)).Returns(false);
+            environmentMock.Setup(x => x.IsProcessRunning("", 100)).Returns(false);
 
             var clientLookup = new ClientLookup(environmentMock.Object);
 
-            Assert.Throws<InvalidOperationException>(clientLookup.GetSystemClient);
+            Assert.Null( clientLookup.GetSystemClient());
         }
 
 
         [Theory]
-        [InlineData(true, "http://haipa.io", "http://haipa.io/identity")]
-        [InlineData(false, "http://haipa.io", "http://haipa.io/")]
-        [InlineData(false, "http://localhost:4711", "http://localhost:4711/")]
-        public void GetSystemClient_reads_process_info(bool forHaipaZero, string baseUrl, string identityEndpoint)
+        [InlineData("http://haipa.io/identity", "http://haipa.io/identity")]
+        [InlineData("http://haipa.io", "http://haipa.io/")]
+        [InlineData("http://localhost:4711", "http://localhost:4711/")]
+        public void GetSystemClient_reads_process_info(string baseUrl, string identityEndpoint)
         {
             var environmentMock = new Mock<IEnvironment>(MockBehavior.Strict);
             var filesystemMock = SetupEnvironmentAndFileSystemWithClientKey(environmentMock);
-
-
-            var moduleName = forHaipaZero ? "zero" : "identity";
+            
 
             filesystemMock.Setup(x =>
-                    x.OpenText(It.Is<string>(p => p.EndsWith($"{moduleName}{Path.DirectorySeparatorChar}.run_info"))))
-                .Returns(new StringReader($"{{\"process_id\" : 100, \"url\" : \"{baseUrl}\"}}"));
+                    x.OpenText(It.Is<string>(p => p.EndsWith(".lock"))))
+                .Returns( () => new StringReader($"{{\"processName\":\"TestingHaipa\",\"processId\":100,\"endpoints\":{{\"identity\":\"{baseUrl}\"}}}}"));
 
-            environmentMock.Setup(x => x.IsProcessRunning(100)).Returns(true);
+            environmentMock.Setup(x => x.IsProcessRunning("TestingHaipa", 100)).Returns(true);
 
             var clientLookup = new ClientLookup(environmentMock.Object);
             var response = clientLookup.GetSystemClient();
 
-
+            Assert.NotNull(response);
             Assert.Equal(identityEndpoint, response.IdentityProvider.ToString());
             Assert.NotNull(response.KeyPair);
             Assert.Equal("system-client", response.Id);
@@ -77,19 +75,6 @@ namespace IdentityModel.Clients.Tests
         }
 
         [Fact]
-        public void GetSystemClient_reads_Private_Key()
-        {
-            var environmentMock = new Mock<IEnvironment>(MockBehavior.Strict);
-            SetupEnvironmentAndFileSystemWithClientKey(environmentMock);
-
-            var clientLookup = new ClientLookup(environmentMock.Object);
-
-
-            Assert.Throws<InvalidOperationException>(clientLookup.GetSystemClient);
-            environmentMock.Verify();
-        }
-
-        [Fact]
         public void GetSystemClient_Throws_if_not_AdminOn_Windows()
         {
             var environmentMock = new Mock<IEnvironment>(MockBehavior.Strict);
@@ -98,7 +83,7 @@ namespace IdentityModel.Clients.Tests
 
             var clientLookup = new ClientLookup(environmentMock.Object);
 
-            Assert.Throws<InvalidOperationException>(clientLookup.GetSystemClient);
+            Assert.Throws<InvalidOperationException>(() =>clientLookup.GetSystemClient());
         }
 
         [Fact]
@@ -111,7 +96,25 @@ namespace IdentityModel.Clients.Tests
 
             var clientLookup = new ClientLookup(environmentMock.Object);
 
-            Assert.Throws<InvalidOperationException>(clientLookup.GetSystemClient);
+            Assert.Throws<InvalidOperationException>(() => clientLookup.GetSystemClient());
+            environmentMock.Verify();
+        }
+
+        [Fact]
+        public void GetSystemClient_Throws_if_HaipaZero_and_not_Windows()
+        {
+            var environmentMock = new Mock<IEnvironment>(MockBehavior.Strict);
+            environmentMock
+                .Setup(x => x.IsOsPlatform(It.Is<OSPlatform>(p => p == OSPlatform.Windows)))
+                .Returns(false);
+            environmentMock
+                .Setup(x => x.IsOsPlatform(It.Is<OSPlatform>(p => p == OSPlatform.Linux)))
+                .Returns(true);
+
+
+            var clientLookup = new ClientLookup(environmentMock.Object);
+
+            Assert.Throws<InvalidOperationException>(() => clientLookup.GetSystemClient("zero"));
             environmentMock.Verify();
         }
     }

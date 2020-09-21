@@ -12,7 +12,7 @@ namespace ClientAuthSample
         {
             var clientLockup = new ClientLookup(new DefaultEnvironment());
 
-            var client = clientLockup.GetDefaultClient("zero");
+            var client = clientLockup.FindClient();
             
             if (client != null)
             {

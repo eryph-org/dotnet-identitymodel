@@ -7,7 +7,6 @@ using Haipa.IdentityModel.Clients.Internal;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Org.BouncyCastle.Crypto;
 
 namespace Haipa.IdentityModel.Clients
 {
@@ -21,7 +20,10 @@ namespace Haipa.IdentityModel.Clients
         {
             _configName = configName;
             _environment = environment;
-            StorePath = Path.Combine(basePath, ".haipa");
+
+            StorePath = ".haipa";
+            if (basePath != null)
+                StorePath = Path.Combine(basePath, StorePath);
         }
 
         public string StorePath { get; }
@@ -37,15 +39,11 @@ namespace Haipa.IdentityModel.Clients
 
         public IEnumerable<ClientData> GetClients(Uri identityEndpoint = null)
         {
-            foreach (var client in (GetSettings().Clients ?? new ClientData[0]))
-            {
-                string keyFileName = Path.Combine(StorePath, "private", $"{client.Id}.key");
-                if (_environment.FileSystem.FileExists(keyFileName))
-                {
-                    AsymmetricCipherKeyPair privateKey = PrivateKeyFile.Read(keyFileName, _environment.FileSystem);
-                    yield return new ClientData(client.Id, client.Name, privateKey, identityEndpoint);
-                }
-            }
+            return from client in (GetSettings().Clients ?? new ClientData[0]) 
+                let keyFileName = Path.Combine(StorePath, "private", $"{client.Id}.key") 
+                where _environment.FileSystem.FileExists(keyFileName) 
+                let privateKey = PrivateKeyFile.Read(keyFileName, _environment.FileSystem) 
+                select new ClientData(client.Id, client.Name, privateKey, identityEndpoint, _configName);
         }
 
 
@@ -108,8 +106,13 @@ namespace Haipa.IdentityModel.Clients
         public void SetEndpoint(string endpointName, Uri endpoint)
         {
             var settings = GetSettings();
+
+            settings.Endpoints ??= new Dictionary<string, Uri>();
+
             if (settings.Endpoints.ContainsKey(endpointName))
                 settings.Endpoints.Remove(endpointName);
+
+            
 
             settings.Endpoints.Add(EndpointNames.Identity, endpoint);
             SaveSettings(settings);
@@ -120,21 +123,30 @@ namespace Haipa.IdentityModel.Clients
             if (client == null) throw new ArgumentNullException(nameof(client));
             if (endpointConfigStore == null) throw new ArgumentNullException(nameof(endpointConfigStore));
 
-            if(client.Id == "system-client")
+            if (client.ConfigurationName != _configName)
+                throw new InvalidOperationException($"client '{client.Id}' has been created for configuration '{client.ConfigurationName}'.");
+
+
+            if (client.Id == "system-client")
                 throw new InvalidOperationException("The system client cannot be saved to config store.");
 
-            endpointConfigStore.Endpoints.TryGetValue(EndpointNames.Identity, out var currentEndpoint);
-
-            if (currentEndpoint == null)
+            if (_configName != ConfigurationNames.Zero && _configName != ConfigurationNames.Local)
             {
-                currentEndpoint = client.IdentityProvider;
-                endpointConfigStore.SetEndpoint(EndpointNames.Identity, currentEndpoint);
+                endpointConfigStore.Endpoints.TryGetValue(EndpointNames.Identity, out var currentEndpoint);
+
+                if (currentEndpoint == null)
+                {
+                    currentEndpoint = client.IdentityProvider;
+                    endpointConfigStore.SetEndpoint(EndpointNames.Identity, currentEndpoint);
+                }
+
+                if (client.IdentityProvider != currentEndpoint)
+                    throw new InvalidOperationException($"This client has been issued by identity provider '{client.IdentityProvider}', but the current configuration uses the provider '{currentEndpoint}'.");
+
             }
-
+            
             var settings = GetSettings();
-
-            if (client.IdentityProvider != currentEndpoint)
-                throw new InvalidOperationException($"This client has been issued by identity provider '{client.IdentityProvider}', but the current configuration uses the provider '{currentEndpoint}'.");
+            settings.Clients ??= new List<ClientData>();
 
             var privatePath = Path.Combine(StorePath, "private");
 
@@ -150,7 +162,7 @@ namespace Haipa.IdentityModel.Clients
             SaveSettings(settings);
         }
 
-        public static ConfigStore GetStore(ConfigStoreLocation location, IEnvironment environment, [NotNull] string configName = "default")
+        public static ConfigStore GetStore(ConfigStoreLocation location, IEnvironment environment, [NotNull] string configName = ConfigurationNames.Default)
         {
             if (configName == null) throw new ArgumentNullException(nameof(configName));
 
@@ -163,19 +175,6 @@ namespace Haipa.IdentityModel.Clients
             };
 
             return new ConfigStore(configName, basePath, environment);
-        }
-
-        public static ConfigStore GetDefaultStore(IEnvironment environment, ConfigStoreContent content, [NotNull] string configName = "default")
-        {
-            if (configName == null) throw new ArgumentNullException(nameof(configName));
-
-            return content switch
-            {
-                ConfigStoreContent.Endpoints => GetStore(ConfigStoreLocation.User, environment, configName),
-                ConfigStoreContent.Clients => GetStore(ConfigStoreLocation.User, environment),
-                ConfigStoreContent.Defaults => GetStore(ConfigStoreLocation.CurrentDirectory, environment, configName),
-                _ => throw new ArgumentOutOfRangeException(nameof(content), content, null)
-            };
         }
     }
 }

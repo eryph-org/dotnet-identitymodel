@@ -9,6 +9,6 @@ namespace Haipa.IdentityModel.Clients
         IFileSystem FileSystem { get; }
         bool IsOsPlatform(OSPlatform platform);
 
-        bool IsProcessRunning(int processId);
+        bool IsProcessRunning(string processName, int processId);
     }
 }

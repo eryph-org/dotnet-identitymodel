@@ -10,13 +10,13 @@ namespace Haipa.IdentityModel.Clients
     {
         private readonly IEnumerable<ConfigStore> _stores;
 
-        public ConfigStoresReader(IEnvironment environment, string configName = "default") : this(
+        public ConfigStoresReader(IEnvironment environment, string configName = ConfigurationNames.Default) : this(
             GetStores(environment, configName), environment, configName)
         {
 
         }
 
-        public ConfigStoresReader(IEnumerable<ConfigStore> stores, IEnvironment environment, string configName = "default")
+        public ConfigStoresReader(IEnumerable<ConfigStore> stores, IEnvironment environment, string configName = ConfigurationNames.Default)
         {
             _stores = stores.Where(x=>x.Exists).ToArray();
         }
@@ -61,10 +61,10 @@ namespace Haipa.IdentityModel.Clients
             return identityEndpoint;
         }
         
-        private static IEnumerable<ConfigStore> GetStores(IEnvironment environment, [NotNull] string configName = "default")
+        private static IEnumerable<ConfigStore> GetStores(IEnvironment environment, [NotNull] string configName = ConfigurationNames.Default)
         {
             bool IsDefaultConfig() =>
-                configName.Equals("default", StringComparison.InvariantCultureIgnoreCase);
+                configName.Equals(ConfigurationNames.Default, StringComparison.InvariantCultureIgnoreCase);
 
             if (configName == null) throw new ArgumentNullException(nameof(configName));
 

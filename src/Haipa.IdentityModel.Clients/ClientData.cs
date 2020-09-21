@@ -14,12 +14,13 @@ namespace Haipa.IdentityModel.Clients
     public sealed class ClientData
     {
 
-        public ClientData(string id, string name, AsymmetricCipherKeyPair keyPair, Uri identityProvider)
+        public ClientData(string id, string name, AsymmetricCipherKeyPair keyPair, Uri identityProvider, string configurationName)
         {
             Id = id;
             Name = name;
             KeyPair = keyPair;
             IdentityProvider = identityProvider;
+            ConfigurationName = configurationName;
         }
 
         /// <summary>
@@ -37,13 +38,14 @@ namespace Haipa.IdentityModel.Clients
         [DataMember]
         public string Name { get; }
 
-        [DataMember]
         [JsonIgnore]
         public AsymmetricCipherKeyPair KeyPair { get; }
 
-        [DataMember]
         [JsonIgnore]
         public Uri IdentityProvider { get; }
+
+        [JsonIgnore]
+        public string ConfigurationName { get; set; }
 
         public Task<AccessTokenResponse> GetAccessToken(HttpClient httpClient = null)
         {
