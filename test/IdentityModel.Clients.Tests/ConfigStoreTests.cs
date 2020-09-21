@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace IdentityModel.Clients.Tests
     {
 
         [Fact]
-        void GetClients_reads_only_valid_clients()
+        public void GetClients_reads_only_valid_clients()
         {
             var filesystemMock = new Mock<IFileSystem>();
             var environmentMock = new Mock<IEnvironment>();
@@ -41,6 +42,22 @@ namespace IdentityModel.Clients.Tests
 
         }
 
+        [Fact]
+        public void Creates_new_ConfigStore_with_Endpoint()
+        {
+            var filesystemMock = new Mock<IFileSystem>();
+            var environmentMock = new Mock<IEnvironment>();
+            environmentMock.Setup(x => x.FileSystem).Returns(filesystemMock.Object);
+            var sb = new StringBuilder();
+            filesystemMock.Setup(x => x.CreateText(It.Is<string>(
+                p=>p.EndsWith("local.config")))).Returns(() => new StringWriter(sb));
 
+            var writer = new ConfigStoresWriter(environmentMock.Object, "local");
+            writer.AddEndpoint("endpointName", new Uri("http://localhost"));
+            
+            environmentMock.Verify();
+            Assert.Equal("{\r\n  \"endpoints\": {\r\n    \"identity\": \"http://localhost\"\r\n  }\r\n}",
+                sb.ToString());
+        }
     }
 }

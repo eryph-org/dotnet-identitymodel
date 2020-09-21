@@ -63,23 +63,11 @@ namespace Haipa.IdentityModel.Clients
         
         private static IEnumerable<ConfigStore> GetStores(IEnvironment environment, [NotNull] string configName = ConfigurationNames.Default)
         {
-            bool IsDefaultConfig() =>
-                configName.Equals(ConfigurationNames.Default, StringComparison.InvariantCultureIgnoreCase);
-
             if (configName == null) throw new ArgumentNullException(nameof(configName));
 
             yield return ConfigStore.GetStore(ConfigStoreLocation.CurrentDirectory, environment, configName);
-            if (!IsDefaultConfig())
-                yield return ConfigStore.GetStore(ConfigStoreLocation.CurrentDirectory, environment);
-
             yield return ConfigStore.GetStore(ConfigStoreLocation.User, environment, configName);
-
-            if (!IsDefaultConfig())
-                yield return ConfigStore.GetStore(ConfigStoreLocation.User, environment);
-
             yield return ConfigStore.GetStore(ConfigStoreLocation.System, environment, configName);
-            if (!IsDefaultConfig())
-                yield return ConfigStore.GetStore(ConfigStoreLocation.System, environment);
 
         }
     }
