@@ -8,7 +8,7 @@ namespace Haipa.IdentityModel.Clients
     {
         public TextReader OpenText(string filepath)
         {
-            return File.OpenText(filepath);
+            return new StreamReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
         }
 
         public TextWriter CreateText(string filepath)
@@ -19,6 +19,21 @@ namespace Haipa.IdentityModel.Clients
         public bool FileExists(string filepath)
         {
             return File.Exists(filepath);
+        }
+
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(path);
+        }
+
+        public void CreateDirectory(string path)
+        {
+            Directory.CreateDirectory(path);
+        }
+
+        public string GetCurrentDirectory()
+        {
+            return Directory.GetCurrentDirectory();
         }
     }
 }

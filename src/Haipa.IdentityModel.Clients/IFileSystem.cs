@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 
 namespace Haipa.IdentityModel.Clients
 {
@@ -10,5 +7,8 @@ namespace Haipa.IdentityModel.Clients
         TextReader OpenText(string filepath);
         TextWriter CreateText(string filepath);
         bool FileExists(string infoFilePath);
+        bool DirectoryExists(string path);
+        void CreateDirectory(string path);
+        string GetCurrentDirectory();
     }
 }

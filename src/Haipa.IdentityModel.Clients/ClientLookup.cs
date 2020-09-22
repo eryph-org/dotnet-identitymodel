@@ -1,117 +1,117 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Runtime.InteropServices;
-using Haipa.IdentityModel.Clients.Internal;
-using Newtonsoft.Json.Linq;
+using JetBrains.Annotations;
 
 namespace Haipa.IdentityModel.Clients
 {
-    public class ClientLookup
+    [PublicAPI]
+    public sealed class ClientLookup
     {
         private readonly IEnvironment _systemEnvironment;
 
-        public ClientLookup(IEnvironment systemEnvironment)
+        public ClientLookup(IEnvironment systemEnvironment = null)
         {
-            _systemEnvironment = systemEnvironment;
+            _systemEnvironment = systemEnvironment ?? new DefaultEnvironment();
         }
 
-        [ExcludeFromCodeCoverage]
-        public ClientLookupResult GetClient()
+        [CanBeNull]
+        public ClientData FindClient()
         {
-            return GetSystemClient();
+            return _systemEnvironment.IsOsPlatform(OSPlatform.Windows) 
+                ? FindClient(ConfigurationNames.Default, ConfigurationNames.Zero, ConfigurationNames.Local) 
+                : FindClient(ConfigurationNames.Default, ConfigurationNames.Local);
         }
 
-        public ClientLookupResult GetSystemClient()
+        [CanBeNull]
+        public ClientData FindClient([NotNull] params string[] configNames)
         {
+            foreach (var configName in configNames)
+            {
+                ClientData result;
+                try
+                {
+                    result = GetDefaultClient(configName);
+                    if (result != null) return result;
+
+                }
+                catch (InvalidOperationException)
+                {
+
+                }
+
+                try
+                {
+                    result = GetSystemClient(configName);
+                    if (result != null) return result;
+
+                }
+                catch (InvalidOperationException)
+                {
+
+                }
+            }
+
+            return null;
+        }
+
+        [CanBeNull]
+        public ClientData GetDefaultClient([NotNull] string configName = ConfigurationNames.Default)
+        {
+            if (configName == null) throw new ArgumentNullException(nameof(configName));
+
+            return new ConfigStoresReader(_systemEnvironment, configName).GetDefaultClient();
+        }
+
+        [CanBeNull]
+        public ClientData GetClientByName([NotNull] string clientName, [NotNull] string configName = ConfigurationNames.Default)
+        {
+            if (clientName == null) throw new ArgumentNullException(nameof(clientName));
+            if (configName == null) throw new ArgumentNullException(nameof(configName));
+
+            return new ConfigStoresReader(_systemEnvironment, configName).GetClientByName(clientName);
+
+        }
+
+        [CanBeNull]
+        public ClientData GetClientById([NotNull] string clientId, [NotNull] string configName = ConfigurationNames.Default)
+        {
+            if (clientId == null) throw new ArgumentNullException(nameof(clientId));
+            if (configName == null) throw new ArgumentNullException(nameof(configName));
+
+            return new ConfigStoresReader(_systemEnvironment, configName).GetClientById(clientId);
+        }
+
+        [CanBeNull]
+        public ClientData GetSystemClient(string configName = ConfigurationNames.Local)
+        {
+            if(configName != ConfigurationNames.Zero && configName != ConfigurationNames.Local)
+                throw new InvalidOperationException($"The system client is not supported for configuration '{configName}.");
+
             if (!_systemEnvironment.IsOsPlatform(OSPlatform.Windows) &&
                 !_systemEnvironment.IsOsPlatform(OSPlatform.Linux))
-            {
                 throw new InvalidOperationException("The system client exists only on Windows and Linux systems.");
-            }
+
+            if (!_systemEnvironment.IsOsPlatform(OSPlatform.Windows) && configName == ConfigurationNames.Zero)
+                throw new InvalidOperationException("The system client for Haipa zero exists only on Windows.");
 
             if (_systemEnvironment.IsOsPlatform(OSPlatform.Windows) && !_systemEnvironment.IsWindowsAdminUser)
-            {
-                throw new InvalidOperationException("This application has to be started as admin to access the Haipa system client. ");
-            }
+                throw new InvalidOperationException(
+                    "This application has to be started as admin to access the Haipa system client. ");
+
             
-            var applicationDataPath =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "haipa");
+            var identityInfo = configName == ConfigurationNames.Zero
+                ? new HaipaZeroInfo(_systemEnvironment)
+                : new LocalIdentityProviderInfo(_systemEnvironment);
 
-            var privateKeyPath = Path.Combine(applicationDataPath,
-                $@"identity{Path.DirectorySeparatorChar}private{Path.DirectorySeparatorChar}clients{Path.DirectorySeparatorChar}system-client.key");
+            if (!identityInfo.IsRunning) return null;
 
-            var privateKey = PrivateKeyFile.Read(privateKeyPath, _systemEnvironment.FileSystem);
+            var identityEndpoint = !identityInfo.Endpoints.TryGetValue(EndpointNames.Identity, out var endpoint)
+                ? throw new InvalidOperationException("could not find identity endpoint for system-client")
+                : endpoint;
 
-            var isHaipaZero = false;
-            string endpoint;
-            try
-            {
-                endpoint = GetLocalIdentityEndpoint();
-            }
-            catch (InvalidOperationException)
-            {
-                endpoint = GetLocalIdentityEndpoint(true);
-                isHaipaZero = true;
-            }
-
-            if (isHaipaZero)
-            {
-                return new ClientLookupResult
-                {
-                    IsHaipaZero = true,
-                    ApiEndpoint = new Uri(new Uri(endpoint), "api").ToString(),
-                    IdentityEndpoint = new Uri(new Uri(endpoint), "identity").ToString(),
-                    Client = new ClientData("system-client", privateKey)
-                };
-            }
-
-            return new ClientLookupResult
-            {
-                IsHaipaZero = false,
-                ApiEndpoint = null,
-                IdentityEndpoint = endpoint,
-                Client = new ClientData("system-client", privateKey)
-            };
-        }
-
-        public string GetLocalIdentityEndpoint(bool forHaipaZero=false)
-        {
-            
-            var applicationDataPath =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "haipa");
-
-            var moduleName = forHaipaZero ? "zero" : "identity";
-            var infoFilePath = Path.Combine(Path.Combine(applicationDataPath, $@"{moduleName}{Path.DirectorySeparatorChar}.run_info"));
-
-            JObject processInfo;
-            try
-            {
-                using var reader = _systemEnvironment.FileSystem.OpenText(infoFilePath);
-                var processInfoData = reader.ReadToEnd();
-                processInfo = JObject.Parse(processInfoData);
-            }
-            catch
-            {
-                if(forHaipaZero)
-                    throw new InvalidOperationException("process info for haipa zero not found.");
-
-                throw new InvalidOperationException("process info for haipa identity not found.");
-
-            }
-
-            var processId = processInfo["process_id"];
-
-            if (_systemEnvironment.IsProcessRunning(processId.ToObject<int>()))
-            {
-               return processInfo["url"].ToString();
-            }
-
-
-            if (forHaipaZero)
-                throw new InvalidOperationException("Haipa zero is not running.");
-
-            throw new InvalidOperationException("Haipa identity is not running.");
+            return new ClientData("system-client", null,
+                identityInfo.GetSystemClientPrivateKey(),
+                identityEndpoint, configName);
 
         }
 

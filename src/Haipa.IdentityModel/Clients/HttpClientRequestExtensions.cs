@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -14,11 +13,12 @@ namespace Haipa.IdentityModel.Clients
 {
     public static class HttpClientExtensions
     {
-        public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient, string clientName, RSAParameters rsaParameters, IEnumerable<string> scopes = null)
+        public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient,
+            string clientName, RSAParameters rsaParameters, IEnumerable<string> scopes = null)
         {
             var fullAddress = httpClient.BaseAddress;
-            if(fullAddress.PathAndQuery!="" && !fullAddress.PathAndQuery.EndsWith("/"))
-                fullAddress = new Uri(fullAddress+"/");
+            if (fullAddress.PathAndQuery != "" && !fullAddress.PathAndQuery.EndsWith("/"))
+                fullAddress = new Uri(fullAddress + "/");
 
             var audience = fullAddress + "connect/token";
             var jwt = CreateClientAssertionJwt(audience, clientName, rsaParameters);
@@ -30,11 +30,10 @@ namespace Haipa.IdentityModel.Clients
                 ["client_id"] = clientName,
                 ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 ["client_assertion"] = jwt
-
             };
 
             var scopesArray = (scopes ?? Array.Empty<string>()).ToArray();
-            if(scopesArray.Any())
+            if (scopesArray.Any())
                 properties.Add("scopes", string.Join(",", scopesArray.Select(x => x)));
 
             var request = new HttpRequestMessage(HttpMethod.Post, audience)
@@ -42,7 +41,8 @@ namespace Haipa.IdentityModel.Clients
                 Content = new FormUrlEncodedContent(properties)
             };
 
-            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
+            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead)
+                .ConfigureAwait(false);
             var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
@@ -59,31 +59,31 @@ namespace Haipa.IdentityModel.Clients
                 var tokenResponse = new AccessTokenResponse
                 {
                     AccessToken = accessToken?.ToString(),
-                    ExpiresOn = expiresIn == null ? default : DateTimeOffset.UtcNow.AddSeconds(expiresIn.ToObject<int>()),
+                    ExpiresOn = expiresIn == null
+                        ? default
+                        : DateTimeOffset.UtcNow.AddSeconds(expiresIn.ToObject<int>()),
                     Scopes = scopesResponse?.ToString().Split(',')
                 };
 
 
                 return tokenResponse;
-
             }
             catch
             {
                 throw new InvalidOperationException("An error occurred while retrieving an access token.");
             }
-
         }
 
         private static string CreateClientAssertionJwt(string audience, string clientName, RSAParameters rsaParameters)
         {
             // set exp to 5 minutes
-            var tokenHandler = new JwtSecurityTokenHandler { TokenLifetimeInMinutes = 5 };
+            var tokenHandler = new JwtSecurityTokenHandler {TokenLifetimeInMinutes = 5};
             var securityToken = tokenHandler.CreateJwtSecurityToken(
                 
                 // iss must be the client_id of our application
-                issuer: clientName,
+                clientName,
                 // aud must be the identity provider (token endpoint)
-                audience: audience,
+                audience,
                 // sub must be the client_id of our application
                 subject: new ClaimsIdentity(
                     new List<Claim>
@@ -97,9 +97,6 @@ namespace Haipa.IdentityModel.Clients
             );
 
             return tokenHandler.WriteToken(securityToken);
-
         }
-        
     }
-
 }

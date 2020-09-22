@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.InteropServices;
-using Newtonsoft.Json.Linq;
+using System.Security.Principal;
 
 namespace Haipa.IdentityModel.Clients
 {
     [ExcludeFromCodeCoverage]
     public class DefaultEnvironment : IEnvironment
     {
+
         public bool IsOsPlatform(OSPlatform platform)
         {
             return RuntimeInformation.IsOSPlatform(platform);
@@ -18,17 +20,19 @@ namespace Haipa.IdentityModel.Clients
         {
             get
             {
-                using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-                var principal = new System.Security.Principal.WindowsPrincipal(identity);
-                return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
-
+                using var identity = WindowsIdentity.GetCurrent();
+                var principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
 
         public IFileSystem FileSystem => new DefaultFileSystem();
-        public bool IsProcessRunning(int processId)
+
+        public bool IsProcessRunning(string processName, int processId)
         {
-            return !Process.GetProcessById(processId).HasExited;
+            var processesWithName = Process.GetProcessesByName(processName);
+
+            return processesWithName.Any(x => !x.HasExited && x.Id == processId);
         }
     }
 }
