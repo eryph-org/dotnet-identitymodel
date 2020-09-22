@@ -41,9 +41,6 @@ This sample shows how to lookup a client from the current system and requests an
 var clientLockup = new ClientLookup(new DefaultEnvironment());
 var result = clientLockup.FindClient();
 
-
-var httpClient = new HttpClient{ BaseAddress = new Uri(result.IdentityEndpoint) };
-
 //request access token from the identity endpoint
 var token = await client.GetAccessToken();
 
