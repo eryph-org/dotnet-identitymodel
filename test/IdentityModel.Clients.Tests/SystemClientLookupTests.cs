@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using Haipa.IdentityModel.Clients;
@@ -30,6 +31,38 @@ namespace IdentityModel.Clients.Tests
             Assert.Null( clientLookup.GetSystemClient());
         }
 
+        [Theory]
+        [InlineData("default")]
+        [InlineData("other")]
+        [InlineData("local")]
+        [InlineData("zero")]
+        public void GetSystemClient_considers_configuration(string configurationName)
+        {
+            var environmentMock = new Mock<IEnvironment>(MockBehavior.Strict);
+            var filesystemMock = SetupEnvironmentAndFileSystemWithClientKey(environmentMock);
+
+            var lockPath = configurationName == "local" ? "identity" : "zero";
+            environmentMock.Setup(x => x.IsOsPlatform(It.Is<OSPlatform>(p => p == OSPlatform.Windows))).Returns(true);
+            environmentMock.Setup(x => x.IsWindowsAdminUser).Returns(true);
+
+            filesystemMock.Setup(x =>
+                    x.OpenText(It.Is<string>(p => p.EndsWith($"{lockPath}{Path.DirectorySeparatorChar}.lock"))))
+                .Returns(() => new StringReader($"{{\"processName\":\"TestingHaipa\",\"processId\":100,\"endpoints\":{{\"identity\":\"http://localhost\"}}}}"));
+
+            environmentMock.Setup(x => x.IsProcessRunning("TestingHaipa", 100)).Returns(true);
+
+            var clientLookup = new ClientLookup(environmentMock.Object);
+
+            if (configurationName!="zero" && configurationName != "local")
+                Assert.Throws<InvalidOperationException>(() => clientLookup.GetSystemClient(configurationName));
+            else
+            {
+                var systemClient = clientLookup.GetSystemClient(configurationName);
+                Assert.NotNull(systemClient);
+            }
+
+            filesystemMock.Verify();
+        }
 
         [Theory]
         [InlineData("http://haipa.io/identity", "http://haipa.io/identity")]
