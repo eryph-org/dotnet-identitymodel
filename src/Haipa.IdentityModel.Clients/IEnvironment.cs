@@ -10,5 +10,8 @@ namespace Haipa.IdentityModel.Clients
         bool IsOsPlatform(OSPlatform platform);
 
         bool IsProcessRunning(string processName, int processId);
+
+        string GetCurrentDirectory();
+
     }
 }

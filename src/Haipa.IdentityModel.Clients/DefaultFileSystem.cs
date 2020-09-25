@@ -4,7 +4,7 @@ using System.IO;
 namespace Haipa.IdentityModel.Clients
 {
     [ExcludeFromCodeCoverage]
-    internal class DefaultFileSystem : IFileSystem
+    public class DefaultFileSystem : IFileSystem
     {
         public TextReader OpenText(string filepath)
         {
@@ -30,10 +30,10 @@ namespace Haipa.IdentityModel.Clients
         {
             Directory.CreateDirectory(path);
         }
-
-        public string GetCurrentDirectory()
+        
+        public void FileDelete(string path)
         {
-            return Directory.GetCurrentDirectory();
+            File.Delete(path);
         }
     }
 }

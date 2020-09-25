@@ -1,16 +1,15 @@
 # Haipa Identity Model
-Haipa .NET library for claims-based identity and client generation
+Haipa .NET library for claims-based identity and client authentication
 
-**NOT ready for production use**
 
 [![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/haipa.dotnet-identitymodel?branchName=master)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=master)
 
 ## Description
 
 **Features**:
-- HttpClient extensions to retrieve access token from Haipa identity server
-- Haipa client discovery 
-- Haipa client key and certificate generator
+- HttpClient extensions to retrieve access token from Haipa identity server (Haipa.IdentityModel)
+- common types for Haipa clients (Haipa.IdentityModel.Clients)
+- private key handling for Haipa clients (Haipa.IdentityModel.Clients)
 
 ## Platforms & Prerequisites
 
@@ -33,16 +32,16 @@ Take a look at the [Using](#using) section learning how to configure.
 
 ## Using
 
-This sample shows how to lookup a client from the current system and requests an access token from the haipa identity service. You will have to add a reference to the Haipa.IdentityModel.Client nuget package to use this example.
+This sample shows how to lookup a client from the current system and requests an access token from the haipa identity service. You will have to add a reference to the Haipa.ClientRuntime.Configuration nuget package to use this example.
 
 ```csharp
 
 //the client lookup searches for a valid client. 
-var clientLockup = new ClientLookup(new DefaultEnvironment());
-var result = clientLockup.FindClient();
+var lookup = new ClientCredentialsLookup(new DefaultEnvironment());
+var credentials = lookup.FindCredentials();
 
 //request access token from the identity endpoint
-var token = await client.GetAccessToken();
+var token = await credentials.GetAccessToken();
 
 
 ```
