@@ -20,11 +20,14 @@ namespace Haipa.IdentityModel.Clients
 
         public Uri IdentityProvider { get; }
 
-        public ClientCredentials(string id, SecureString keyPairData, Uri identityProvider)
+        public string Configuration { get; }
+        
+        public ClientCredentials(string id, SecureString keyPairData, Uri identityProvider, string configuration)
         {
             Id = id;
             KeyPairData = keyPairData;
             IdentityProvider = identityProvider;
+            Configuration = configuration;
         }
 
         public Task<AccessTokenResponse> GetAccessToken(HttpClient httpClient = null)
