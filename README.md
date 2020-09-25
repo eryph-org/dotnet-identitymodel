@@ -1,16 +1,15 @@
 # Haipa Identity Model
-Haipa .NET library for claims-based identity and client generation
+Haipa .NET library for claims-based identity and client authentication
 
-**NOT ready for production use**
 
 [![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/haipa.dotnet-identitymodel?branchName=master)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=master)
 
 ## Description
 
 **Features**:
-- HttpClient extensions to retrieve access token from Haipa identity server
-- Haipa client discovery 
-- Haipa client key and certificate generator
+- HttpClient extensions to retrieve access token from Haipa identity server (Haipa.IdentityModel)
+- common types for Haipa clients (Haipa.IdentityModel.Clients)
+- private key handling for Haipa clients (Haipa.IdentityModel.Clients)
 
 ## Platforms & Prerequisites
 
