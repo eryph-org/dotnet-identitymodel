@@ -33,16 +33,16 @@ Take a look at the [Using](#using) section learning how to configure.
 
 ## Using
 
-This sample shows how to lookup a client from the current system and requests an access token from the haipa identity service. You will have to add a reference to the Haipa.IdentityModel.Client nuget package to use this example.
+This sample shows how to lookup a client from the current system and requests an access token from the haipa identity service. You will have to add a reference to the Haipa.ClientRuntime.Configuration nuget package to use this example.
 
 ```csharp
 
 //the client lookup searches for a valid client. 
-var clientLockup = new ClientLookup(new DefaultEnvironment());
-var result = clientLockup.FindClient();
+var lookup = new CredentialsLookup(new DefaultEnvironment());
+var credentials = lookup.FindClientCredentials();
 
 //request access token from the identity endpoint
-var token = await client.GetAccessToken();
+var token = await credentials.GetAccessToken();
 
 
 ```

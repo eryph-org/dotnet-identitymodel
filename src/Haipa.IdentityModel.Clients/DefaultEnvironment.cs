@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -26,13 +27,18 @@ namespace Haipa.IdentityModel.Clients
             }
         }
 
-        public IFileSystem FileSystem => new DefaultFileSystem();
+        public virtual IFileSystem FileSystem => new DefaultFileSystem();
 
         public bool IsProcessRunning(string processName, int processId)
         {
             var processesWithName = Process.GetProcessesByName(processName);
 
             return processesWithName.Any(x => !x.HasExited && x.Id == processId);
+        }
+
+        public virtual string GetCurrentDirectory()
+        {
+            return Directory.GetCurrentDirectory();
         }
     }
 }

@@ -21,7 +21,7 @@ namespace IdentityModel.Clients.Tests
             var fileSystemMock = new Mock<IFileSystem>(MockBehavior.Strict);
             fileSystemMock.Setup(x => x.OpenText(It.IsAny<string>())).Returns(new StringReader(TestData.PrivateKeyFileString));
 
-            var keyPair = PrivateKeyFile.Read(null, fileSystemMock.Object);
+            var keyPair = PrivateKey.ReadFile(null, fileSystemMock.Object);
             Assert.NotNull(keyPair);
         }
 
@@ -42,7 +42,7 @@ namespace IdentityModel.Clients.Tests
             var fileSystemMock = new Mock<IFileSystem>(MockBehavior.Strict);
             fileSystemMock.Setup(x => x.CreateText(It.IsNotNull<string>())).Returns(new StringWriter(sb)).Verifiable();
 
-            PrivateKeyFile.Write("path", kpGenerator.GenerateKeyPair(), fileSystemMock.Object);
+            PrivateKey.WriteFile("path", kpGenerator.GenerateKeyPair(), fileSystemMock.Object);
 
             fileSystemMock.Verify();
             Assert.NotEmpty(sb.ToString());

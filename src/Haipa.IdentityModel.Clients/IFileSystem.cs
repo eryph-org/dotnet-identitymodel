@@ -9,6 +9,7 @@ namespace Haipa.IdentityModel.Clients
         bool FileExists(string infoFilePath);
         bool DirectoryExists(string path);
         void CreateDirectory(string path);
-        string GetCurrentDirectory();
+
+        void FileDelete(string path);
     }
 }
