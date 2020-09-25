@@ -37,7 +37,7 @@ This sample shows how to lookup a client from the current system and requests an
 ```csharp
 
 //the client lookup searches for a valid client. 
-var lookup = new CredentialsLookup(new DefaultEnvironment());
+var lookup = new ClientCredentialsLookup(new DefaultEnvironment());
 var credentials = lookup.FindClientCredentials();
 
 //request access token from the identity endpoint
