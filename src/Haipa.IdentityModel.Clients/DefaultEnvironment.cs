@@ -12,12 +12,12 @@ namespace Haipa.IdentityModel.Clients
     public class DefaultEnvironment : IEnvironment
     {
 
-        public bool IsOsPlatform(OSPlatform platform)
+        public virtual bool IsOsPlatform(OSPlatform platform)
         {
             return RuntimeInformation.IsOSPlatform(platform);
         }
 
-        public bool IsWindowsAdminUser
+        public virtual bool IsWindowsAdminUser
         {
             get
             {
@@ -29,7 +29,7 @@ namespace Haipa.IdentityModel.Clients
 
         public virtual IFileSystem FileSystem => new DefaultFileSystem();
 
-        public bool IsProcessRunning(string processName, int processId)
+        public virtual bool IsProcessRunning(string processName, int processId)
         {
             var processesWithName = Process.GetProcessesByName(processName);
 
