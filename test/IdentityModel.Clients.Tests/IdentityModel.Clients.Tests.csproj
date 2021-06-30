@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Haipa.IdentityModel.Clients\Haipa.IdentityModel.Clients.csproj" />
+    <ProjectReference Include="..\..\src\Eryph.IdentityModel.Clients\Eryph.IdentityModel.Clients.csproj" />
   </ItemGroup>
 
 </Project>

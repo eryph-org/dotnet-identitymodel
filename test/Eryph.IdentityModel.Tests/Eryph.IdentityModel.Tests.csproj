@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Haipa.IdentityModel.Clients\Haipa.IdentityModel.Clients.csproj" />
-    <ProjectReference Include="..\..\src\Haipa.IdentityModel\Haipa.IdentityModel.csproj" />
+    <ProjectReference Include="..\..\src\Eryph.IdentityModel.Clients\Eryph.IdentityModel.Clients.csproj" />
+    <ProjectReference Include="..\..\src\Eryph.IdentityModel\Eryph.IdentityModel.csproj" />
   </ItemGroup>
 
 </Project>
