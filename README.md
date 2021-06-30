@@ -32,7 +32,7 @@ Take a look at the [Using](#using) section learning how to configure.
 
 ## Using
 
-This sample shows how to lookup a client from the current system and requests an access token from the haipa identity service. You will have to add a reference to the Eryph.ClientRuntime.Configuration nuget package to use this example.
+This sample shows how to lookup a client from the current system and requests an access token from the eryph identity service. You will have to add a reference to the Eryph.ClientRuntime.Configuration nuget package to use this example.
 
 ```csharp
 
