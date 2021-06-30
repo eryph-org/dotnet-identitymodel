@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Haipa.IdentityModel.Clients
+namespace Eryph.IdentityModel.Clients
 {
     public sealed class AccessTokenResponse
     {

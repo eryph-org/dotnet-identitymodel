@@ -3,7 +3,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 
-namespace Haipa.IdentityModel.Clients
+namespace Eryph.IdentityModel.Clients
 {
     public static class KeyPairExtensions
     {

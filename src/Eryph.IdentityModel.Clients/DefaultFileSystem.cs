@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace Haipa.IdentityModel.Clients
+namespace Eryph.IdentityModel.Clients
 {
     [ExcludeFromCodeCoverage]
     public class DefaultFileSystem : IFileSystem

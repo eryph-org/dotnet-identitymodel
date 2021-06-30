@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text;
-using Haipa.IdentityModel.Clients;
-using Haipa.IdentityModel.Clients.Internal;
+using Eryph.IdentityModel.Clients;
+using Eryph.IdentityModel.Clients.Internal;
 using Moq;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;

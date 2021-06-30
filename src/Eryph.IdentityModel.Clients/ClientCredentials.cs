@@ -6,9 +6,8 @@ using System.Runtime.Serialization;
 using System.Security;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 
-namespace Haipa.IdentityModel.Clients
+namespace Eryph.IdentityModel.Clients
 {
     [PublicAPI]
     public sealed class ClientCredentials

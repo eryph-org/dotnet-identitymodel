@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 
-namespace Haipa.IdentityModel.Clients
+namespace Eryph.IdentityModel.Clients
 {
     public static class HttpClientExtensions
     {

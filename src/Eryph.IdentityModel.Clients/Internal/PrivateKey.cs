@@ -4,7 +4,7 @@ using System.Text;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.OpenSsl;
 
-namespace Haipa.IdentityModel.Clients.Internal
+namespace Eryph.IdentityModel.Clients.Internal
 {
     public static class PrivateKey
     {

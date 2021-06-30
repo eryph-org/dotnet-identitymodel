@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Haipa.IdentityModel.Clients
+namespace Eryph.IdentityModel.Clients
 {
     public interface IFileSystem
     {

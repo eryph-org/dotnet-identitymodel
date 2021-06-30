@@ -1,10 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
-using Org.BouncyCastle.Crypto;
 
-namespace Haipa.IdentityModel.Clients
+namespace Eryph.IdentityModel.Clients
 {
     [PublicAPI]
     public sealed class ClientData

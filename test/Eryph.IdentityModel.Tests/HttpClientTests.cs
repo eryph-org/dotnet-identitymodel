@@ -5,14 +5,14 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Haipa.IdentityModel.Clients;
+using Eryph.IdentityModel.Clients;
 using Moq;
 using Moq.Protected;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.OpenSsl;
 using Xunit;
 
-namespace Haipa.IdentityModel.Tests
+namespace Eryph.IdentityModel.Tests
 {
     public class HttpClientTests
     {
