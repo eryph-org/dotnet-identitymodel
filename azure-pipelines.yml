@@ -2,8 +2,8 @@ resources:
   repositories:
   - repository: build
     type: github
-    name: Haipa/build
-    endpoint: haipa
+    name: eryph-org/build
+    endpoint: eryph-org
 
 
 extends:
