@@ -2,7 +2,7 @@
 Eryph .NET library for claims-based identity and client authentication
 
 
-[![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/haipa.dotnet-identitymodel?branchName=master)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=master)
+[![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/eryph-org.dotnet-identitymodel?branchName=master)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=master)
 
 ## Description
 
@@ -50,13 +50,13 @@ var token = await credentials.GetAccessToken();
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/haipa/dotnet-identitymodel/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/eryph-org/dotnet-identitymodel/tags). 
 
 ## Authors
 
 * **Frank Wagner** - *Initial work* - [fw2568](https://github.com/fw2568)
 
-See also the list of [contributors](https://github.com/haipa/dotnet-identitymodel/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/eryph-org/dotnet-identitymodel/contributors) who participated in this project.
 
 
 ## License
