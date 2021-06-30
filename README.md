@@ -1,5 +1,5 @@
-# Haipa Identity Model
-Haipa .NET library for claims-based identity and client authentication
+# Eryph Identity Model
+Eryph .NET library for claims-based identity and client authentication
 
 
 [![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/haipa.dotnet-identitymodel?branchName=master)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=master)
@@ -7,9 +7,9 @@ Haipa .NET library for claims-based identity and client authentication
 ## Description
 
 **Features**:
-- HttpClient extensions to retrieve access token from Haipa identity server (Haipa.IdentityModel)
-- common types for Haipa clients (Haipa.IdentityModel.Clients)
-- private key handling for Haipa clients (Haipa.IdentityModel.Clients)
+- HttpClient extensions to retrieve access token from Eryph identity server (Eryph.IdentityModel)
+- common types for Eryph clients (Eryph.IdentityModel.Clients)
+- private key handling for Eryph clients (Eryph.IdentityModel.Clients)
 
 ## Platforms & Prerequisites
 
@@ -22,7 +22,7 @@ All platforms and runtimes (.NET Framework / .NET Core / all .NET supported oper
 
 ## Getting started
 
-The packages of this library (**Haipa.IdentityModel** and **Haipa.IdentityModel.Client**) are currently only available as CI build on the dbosoft public nuget feed:
+The packages of this library (**Eryph.IdentityModel** and **Eryph.IdentityModel.Client**) are currently only available as CI build on the dbosoft public nuget feed:
 
 https://dev.azure.com/dbosoft/public/_packaging?_a=feed&feed=Public
 
@@ -32,7 +32,7 @@ Take a look at the [Using](#using) section learning how to configure.
 
 ## Using
 
-This sample shows how to lookup a client from the current system and requests an access token from the haipa identity service. You will have to add a reference to the Haipa.ClientRuntime.Configuration nuget package to use this example.
+This sample shows how to lookup a client from the current system and requests an access token from the haipa identity service. You will have to add a reference to the Eryph.ClientRuntime.Configuration nuget package to use this example.
 
 ```csharp
 
