@@ -7,7 +7,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 
 namespace Eryph.IdentityModel.Clients
 {
@@ -48,8 +47,8 @@ namespace Eryph.IdentityModel.Clients
 
             try
             {
-                var payload = JObject.Parse(content);
-                if (payload["error"] != null)
+                var payload = JwtPayload.Deserialize(content);
+                if (payload.TryGetValue("error", out _))
                     throw new InvalidOperationException();
 
                 payload.TryGetValue("access_token", out var accessToken);
@@ -61,7 +60,7 @@ namespace Eryph.IdentityModel.Clients
                     AccessToken = accessToken?.ToString(),
                     ExpiresOn = expiresIn == null
                         ? default
-                        : DateTimeOffset.UtcNow.AddSeconds(expiresIn.ToObject<int>()),
+                        : DateTimeOffset.UtcNow.AddSeconds(Convert.ToInt32(expiresIn)),
                     Scopes = scopesResponse?.ToString().Split(',')
                 };
 
