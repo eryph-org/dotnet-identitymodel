@@ -2,7 +2,7 @@
 Eryph .NET library for claims-based identity and client authentication
 
 
-[![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/eryph-org.dotnet-identitymodel?branchName=master)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=master)
+[![Build Status](https://dev.azure.com/dbosoft/public/_apis/build/status/eryph-org.dotnet-identitymodel?branchName=main)](https://dev.azure.com/dbosoft/public/_build/latest?definitionId=31&branchName=main)
 
 ## Description
 
