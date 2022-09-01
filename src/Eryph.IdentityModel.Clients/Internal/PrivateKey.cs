@@ -17,7 +17,7 @@ namespace Eryph.IdentityModel.Clients.Internal
 
         }
 
-        public static AsymmetricCipherKeyPair ReadFile(string filepath, IFileSystem fileSystem, PrivateKeyProtectionLevel protectionLevel)
+        public static AsymmetricCipherKeyPair ReadFile(string filepath, IFileSystem fileSystem, PrivateKeyProtectionLevel protectionLevel, byte[] entropy = null)
         {
             var scope = protectionLevel switch
             {
@@ -28,7 +28,8 @@ namespace Eryph.IdentityModel.Clients.Internal
 
             try
             {
-                var entropy = Encoding.UTF8.GetBytes(filepath.ToLowerInvariant());
+                entropy ??= Encoding.UTF8.GetBytes(filepath.ToLowerInvariant());
+
                 using var stream = fileSystem.OpenStream(filepath);
 
                 using var protectedDataStream = new MemoryStream();
@@ -60,7 +61,7 @@ namespace Eryph.IdentityModel.Clients.Internal
             new PemWriter(writer).WriteObject(keyPair);
         }
 
-        public static void WriteFile(string filepath, AsymmetricCipherKeyPair keyPair, IFileSystem fileSystem, PrivateKeyProtectionLevel protectionLevel)
+        public static void WriteFile(string filepath, AsymmetricCipherKeyPair keyPair, IFileSystem fileSystem, PrivateKeyProtectionLevel protectionLevel, byte[] entropy = null)
         {
             var scope = protectionLevel switch
             {
@@ -75,7 +76,7 @@ namespace Eryph.IdentityModel.Clients.Internal
             pem.WriteObject(keyPair);
             memoryStreamWriter.Flush();
 
-            var entropy = Encoding.UTF8.GetBytes(filepath.ToLowerInvariant());
+            entropy ??= Encoding.UTF8.GetBytes(filepath.ToLowerInvariant());
             
             var protectedData = ProtectedData.Protect(
                 memoryStream.ToArray(), entropy, scope);
