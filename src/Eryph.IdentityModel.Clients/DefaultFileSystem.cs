@@ -6,14 +6,14 @@ namespace Eryph.IdentityModel.Clients
     [ExcludeFromCodeCoverage]
     public class DefaultFileSystem : IFileSystem
     {
-        public TextReader OpenText(string filepath)
+        public Stream OpenStream(string filepath)
         {
-            return new StreamReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            return new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
 
-        public TextWriter CreateText(string filepath)
+        public Stream CreateStream(string filepath)
         {
-            return File.CreateText(filepath);
+            return File.Create(filepath);
         }
 
         public bool FileExists(string filepath)
