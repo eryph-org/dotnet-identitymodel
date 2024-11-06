@@ -57,10 +57,6 @@ namespace IdentityModel.Clients.Tests
         [Fact]
         public void Write_writes_KeyPairFile()
         {
-            //var (certificate, keyPair) = X509Generation.GenerateSelfSignedCertificate("test-client");
-            //var certString = Convert.ToBase64String(certificate.GetEncoded());
-
-
             var kpGenerator = new RsaKeyPairGenerator();
 
             // certificate strength 2048 bits
