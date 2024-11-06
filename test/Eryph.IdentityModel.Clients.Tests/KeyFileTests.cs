@@ -1,8 +1,4 @@
-using System;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using Eryph.IdentityModel.Clients;
 using Eryph.IdentityModel.Clients.Internal;
 using Moq;
 using Org.BouncyCastle.Crypto;
@@ -11,7 +7,7 @@ using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Security;
 using Xunit;
 
-namespace IdentityModel.Clients.Tests
+namespace Eryph.IdentityModel.Clients.Tests
 {
     public class KeyFileTests
     {
