@@ -12,8 +12,11 @@ namespace Eryph.IdentityModel.Clients
 {
     public static class HttpClientExtensions
     {
-        public static async Task<AccessTokenResponse> GetClientAccessToken(this HttpClient httpClient,
-            string clientName, RSAParameters rsaParameters, IEnumerable<string> scopes = null)
+        public static async Task<AccessTokenResponse> GetClientAccessToken(
+            this HttpClient httpClient,
+            string clientName,
+            RSAParameters rsaParameters,
+            IEnumerable<string> scopes = null)
         {
             var fullAddress = httpClient.BaseAddress;
             if (fullAddress.PathAndQuery != "" && !fullAddress.PathAndQuery.EndsWith("/"))
