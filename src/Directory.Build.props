@@ -9,7 +9,6 @@
     <Description>Eryph .NET library for authentication on Eryph.</Description>
     <Copyright>dbosoft GmbH. All rights reserved.</Copyright>
     <RepositoryUrl>https://github.com/eryph-org/dotnet-identitymodel</RepositoryUrl>
-    <RootNamespace>Eryph.ConfigModel</RootNamespace>
     <!-- Declare that the Repository URL can be published to NuSpec -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <!-- Embed source files that are not tracked by the source control manager to the PDB -->
