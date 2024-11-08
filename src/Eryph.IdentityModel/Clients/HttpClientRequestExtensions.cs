@@ -90,7 +90,10 @@ public static class HttpClientExtensions
                 ExpiresOn = tokenJsonResponse.ExpiresIn.HasValue
                     ? DateTimeOffset.UtcNow.AddSeconds(tokenJsonResponse.ExpiresIn.Value)
                     : null,
-                Scopes = tokenJsonResponse.Scope?.Split(','),
+                // Use the requested scopes if the response from the server does not
+                // contain any scopes. The scopes in the response are optional when
+                // the server granted exactly the requested scopes.
+                Scopes = tokenJsonResponse.Scope?.Split(',') ?? scopes,
             };
 
             return tokenResponse;

@@ -67,11 +67,12 @@ public class HttpClientExtensionsTests
         var response = await httpClient.GetClientAccessToken(
             _tokenUrl,
             "test-client",
-            _rsaParameters);
+            _rsaParameters,
+            ["test-scope"]);
 
         response.AccessToken.Should().Be("token");
         response.ExpiresOn.Should().BeNull();
-        response.Scopes.Should().BeNull();
+        response.Scopes.Should().Equal("test-scope");
     }
 
     [Fact]
