@@ -23,5 +23,5 @@ public sealed class AccessTokenResponse
     /// <summary>
     /// The scopes which have been granted to this access token.
     /// </summary>
-    public IEnumerable<string> Scopes { get; internal set; }
+    public IReadOnlyList<string> Scopes { get; internal set; }
 }

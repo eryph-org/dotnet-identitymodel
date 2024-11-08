@@ -9,52 +9,59 @@ using JetBrains.Annotations;
 namespace Eryph.IdentityModel.Clients;
 
 [PublicAPI]
-public sealed class ClientCredentials(
-    string id,
-    SecureString keyPairData,
-    Uri identityProvider,
-    string configuration)
+public sealed class ClientCredentials
 {
-    public string Id { get; } = id;
+    private readonly Uri _tokenUrl;
 
-    public SecureString KeyPairData { get; } = keyPairData;
+    public ClientCredentials(string id,
+        SecureString keyPairData,
+        Uri identityProvider,
+        string configuration)
+    {
+        Id = id;
+        KeyPairData = keyPairData;
+        IdentityProvider = identityProvider;
+        Configuration = configuration;
+        var uriBuilder = new UriBuilder(IdentityProvider);
+        uriBuilder.Path += uriBuilder.Path.EndsWith("/") ? "connect/token" : "/connect/token";
+        _tokenUrl = uriBuilder.Uri;
+    }
 
-    public Uri IdentityProvider { get; } = identityProvider;
+    public string Id { get; }
 
-    public string Configuration { get; } = configuration;
+    public SecureString KeyPairData { get; }
 
-    public Task<AccessTokenResponse> GetAccessToken(HttpClient httpClient = null)
+    public Uri IdentityProvider { get; }
+
+    public string Configuration { get; }
+
+    public Task<AccessTokenResponse> GetAccessToken(
+        HttpClient httpClient = null)
     {
         return GetAccessToken(null, httpClient);
     }
 
-    public async Task<AccessTokenResponse> GetAccessToken(IEnumerable<string> scopes, HttpClient httpClient = null)
+    public async Task<AccessTokenResponse> GetAccessToken(
+        IReadOnlyList<string> scopes,
+        HttpClient httpClient = null)
     {
         var disposeHttpClient = httpClient == null;
-        httpClient ??= new HttpClient();
-
-        httpClient.BaseAddress = IdentityProvider;
-
         var keyPairPtr = Marshal.SecureStringToGlobalAllocUnicode(KeyPairData);
+        
         try
         {
+            httpClient ??= new HttpClient();
             var keyPair = Internal.PrivateKey.ReadString(Marshal.PtrToStringUni(keyPairPtr));
-            if (!disposeHttpClient)
-                return await httpClient.GetClientAccessToken(
-                    Id,
-                    keyPair.ToRSAParameters(), scopes).ConfigureAwait(false);
-
-            using (httpClient)
-            {
-                var result = await httpClient.GetClientAccessToken(
-                    Id,
-                    keyPair.ToRSAParameters(), scopes).ConfigureAwait(false);
-                return result;
-            }
+            return await httpClient.GetClientAccessToken(
+                    _tokenUrl, Id, keyPair.ToRSAParameters(), scopes)
+                .ConfigureAwait(false);
         }
         finally
         {
             Marshal.ZeroFreeGlobalAllocUnicode(keyPairPtr);
+            if (disposeHttpClient)
+                httpClient?.Dispose();
+            
         }
     }
 }
