@@ -11,6 +11,7 @@ namespace Eryph.IdentityModel.Clients.Tests
 {
     public class KeyFileTests
     {
+        private const string KeyFileName = "test.key";
 
         [Fact]
         public void Write_Read_KeyPair_with_protection()
@@ -23,9 +24,9 @@ namespace Eryph.IdentityModel.Clients.Tests
             fileSystemMock.Setup(x => x.OpenStream(It.IsAny<string>())).Returns(memoryStream);
 
             var exp = PrivateKey.ReadString(TestData.PrivateKeyFileString);
-            PrivateKey.WriteFile("peng", exp, fileSystemMock.Object, PrivateKeyProtectionLevel.User);
+            PrivateKey.WriteFile(KeyFileName, exp, fileSystemMock.Object, PrivateKeyProtectionLevel.User);
             memoryStream.Seek(0, SeekOrigin.Begin);
-            var act = PrivateKey.ReadFile("peng", fileSystemMock.Object, PrivateKeyProtectionLevel.User);
+            var act = PrivateKey.ReadFile(KeyFileName, fileSystemMock.Object, PrivateKeyProtectionLevel.User);
             Assert.NotNull(act);
             Assert.Equal(exp.Private, act.Private);
             Assert.Equal(exp.Public, act.Public);
@@ -65,7 +66,7 @@ namespace Eryph.IdentityModel.Clients.Tests
             fileSystemMock.Setup(x => x.CreateStream(It.IsNotNull<string>()))
                 .Returns(new WrappedStream(memoryStream)).Verifiable();
 
-            PrivateKey.WriteFile("path", kpGenerator.GenerateKeyPair(), fileSystemMock.Object);
+            PrivateKey.WriteFile(KeyFileName, kpGenerator.GenerateKeyPair(), fileSystemMock.Object);
 
             fileSystemMock.Verify();
             memoryStream.Seek(0, SeekOrigin.Begin);
@@ -122,9 +123,6 @@ namespace Eryph.IdentityModel.Clients.Tests
                 get => _innerStream.Position;
                 set => _innerStream.Position = value;
             }
-
-            
         }
-
     }
 }
