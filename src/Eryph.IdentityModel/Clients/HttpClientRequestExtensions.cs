@@ -44,7 +44,7 @@ public static class HttpClientExtensions
         };
         
         if (scopes is { Count: > 0 })
-            properties.Add("scopes", string.Join(",", scopes));
+            properties.Add("scope", string.Join(",", scopes));
 
         var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpointUrl)
         {
