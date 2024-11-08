@@ -42,10 +42,9 @@ public static class HttpClientExtensions
             ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
             ["client_assertion"] = jwt
         };
-
-        var scopesArray = (scopes ?? Array.Empty<string>()).ToArray();
-        if (scopesArray.Any())
-            properties.Add("scopes", string.Join(",", scopesArray.Select(x => x)));
+        
+        if (scopes is { Count: > 0 })
+            properties.Add("scopes", string.Join(",", scopes));
 
         var request = new HttpRequestMessage(HttpMethod.Post, tokenEndpointUrl)
         {
