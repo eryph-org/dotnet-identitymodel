@@ -39,6 +39,7 @@ namespace Eryph.IdentityModel.Clients.Internal
                 using var decryptedData = new MemoryStream(
                     ProtectedData.Unprotect(protectedDataStream.GetBuffer(), entropy, scope));
                 using var reader = new StreamReader(decryptedData);
+
                 return (AsymmetricCipherKeyPair)new PemReader(reader).ReadObject();
             }
             catch (Exception)
