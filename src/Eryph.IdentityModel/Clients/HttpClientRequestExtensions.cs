@@ -27,13 +27,18 @@ public static class HttpClientExtensions
         Uri tokenEndpointUrl,
         string clientName,
         RSAParameters rsaParameters,
-        IReadOnlyList<string> scopes = null)
+        IReadOnlyList<string> scopes = null,
+        string audience = null,
+        string tokenType = null)
     {
         if (!tokenEndpointUrl.IsAbsoluteUri)
             throw new AccessTokenException("The token endpoint URL is not an absolute URL.");
 
-        var audience = tokenEndpointUrl.AbsoluteUri;
-        var jwt = CreateClientAssertionJwt(audience, clientName, rsaParameters);
+        // The audience defaults to the token endpoint (the behaviour expected by eryph servers
+        // before OpenIddict 7.0). Callers that detected a newer server pass the issuer as the
+        // audience together with the "client-authentication+jwt" token type.
+        var jwt = CreateClientAssertionJwt(
+            audience ?? tokenEndpointUrl.AbsoluteUri, tokenType, clientName, rsaParameters);
 
         var properties = new Dictionary<string, string>
         {
@@ -42,7 +47,7 @@ public static class HttpClientExtensions
             ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
             ["client_assertion"] = jwt
         };
-        
+
         if (scopes is { Count: > 0 })
             properties.Add("scope", string.Join(" ", scopes));
 
@@ -108,14 +113,15 @@ public static class HttpClientExtensions
         HttpStatusCode statusCode) =>
         new($"Could not retrieve an access token. The server responded with {statusCode}.");
 
-    private static string CreateClientAssertionJwt(string audience, string clientName, RSAParameters rsaParameters)
+    private static string CreateClientAssertionJwt(
+        string audience, string tokenType, string clientName, RSAParameters rsaParameters)
     {
         // Set exp to 5 minutes
         var tokenHandler = new JwtSecurityTokenHandler { TokenLifetimeInMinutes = 5 };
         var securityToken = tokenHandler.CreateJwtSecurityToken(
             // iss must be the client_id of our application
             clientName,
-            // aud must be the identity provider (token endpoint)
+            // aud must be the identity provider: the issuer for newer servers, the token endpoint for older ones
             audience,
             // sub must be the client_id of our application
             subject: new ClaimsIdentity(
@@ -127,6 +133,11 @@ public static class HttpClientExtensions
             signingCredentials: new SigningCredentials(new RsaSecurityKey(rsaParameters), "RS256")
         );
 
+        // Newer eryph servers (OpenIddict 7.0+) require the standardized client-authentication+jwt
+        // token type. Older servers don't inspect the "typ" header, so it is only set when needed.
+        if (!string.IsNullOrEmpty(tokenType))
+            securityToken.Header["typ"] = tokenType;
+
         return tokenHandler.WriteToken(securityToken);
     }
 
@@ -135,7 +146,7 @@ public static class HttpClientExtensions
         [JsonRequired] public string AccessToken { get; set; }
 
         public int? ExpiresIn { get; set; }
-        
+
         public string Scope { get; set; }
     }
 
