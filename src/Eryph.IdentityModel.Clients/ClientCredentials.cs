@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -61,23 +62,37 @@ public sealed class ClientCredentials
         HttpClient httpClient = null)
     {
         var disposeHttpClient = httpClient == null;
-        var keyPairPtr = Marshal.SecureStringToGlobalAllocUnicode(KeyPairData);
-        
+        httpClient ??= new HttpClient();
+
         try
         {
-            httpClient ??= new HttpClient();
+            // Resolve the assertion format (a network call to the discovery endpoint) before pinning
+            // the private key in unmanaged memory, and unpin it immediately after reading it, so the
+            // plaintext key is exposed for as short a time as possible.
             var (audience, tokenType) = await ResolveAssertionFormat(httpClient).ConfigureAwait(false);
-            var keyPair = Internal.PrivateKey.ReadString(Marshal.PtrToStringUni(keyPairPtr));
+            var rsaParameters = ReadRsaParameters();
+
             return await httpClient.GetClientAccessToken(
-                    _tokenUrl, Id, keyPair.ToRSAParameters(), scopes, audience, tokenType)
+                    _tokenUrl, Id, rsaParameters, scopes, audience, tokenType)
                 .ConfigureAwait(false);
         }
         finally
         {
-            Marshal.ZeroFreeGlobalAllocUnicode(keyPairPtr);
             if (disposeHttpClient)
-                httpClient?.Dispose();
+                httpClient.Dispose();
+        }
+    }
 
+    private RSAParameters ReadRsaParameters()
+    {
+        var keyPairPtr = Marshal.SecureStringToGlobalAllocUnicode(KeyPairData);
+        try
+        {
+            return Internal.PrivateKey.ReadString(Marshal.PtrToStringUni(keyPairPtr)).ToRSAParameters();
+        }
+        finally
+        {
+            Marshal.ZeroFreeGlobalAllocUnicode(keyPairPtr);
         }
     }
 
