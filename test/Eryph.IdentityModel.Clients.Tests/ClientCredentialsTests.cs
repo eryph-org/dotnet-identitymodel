@@ -63,6 +63,20 @@ public class ClientCredentialsTests
     }
 
     [Fact]
+    public async Task GetAccessToken_IssuerAudienceAdvertisedButIssuerMissing_ThrowsAndDoesNotRequestToken()
+    {
+        // The server requires the issuer as the audience but the discovery document omits it:
+        // invalid metadata must fail rather than downgrade to a legacy assertion.
+        var handler = new FakeIdentityHandler(advertiseIssuerAudience: true) { IncludeIssuer = false };
+        using var httpClient = new HttpClient(handler);
+
+        var act = async () => await CreateCredentials().GetAccessToken(httpClient);
+
+        await act.Should().ThrowAsync<AccessTokenException>();
+        handler.TokenRequested.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task GetAccessToken_DiscoveryFailure_ThrowsAndDoesNotRequestToken()
     {
         var handler = new FakeIdentityHandler(advertiseIssuerAudience: true)
@@ -88,6 +102,8 @@ public class ClientCredentialsTests
 
         public HttpStatusCode DiscoveryStatus { get; set; } = HttpStatusCode.OK;
 
+        public bool IncludeIssuer { get; set; } = true;
+
         public bool TokenRequested { get; private set; }
 
         public string ClientAssertion { get; private set; }
@@ -104,9 +120,11 @@ public class ClientCredentialsTests
                     ? ", \"eryph_client_assertion_audience\": \"issuer\""
                     : "";
 
+                var issuerPart = IncludeIssuer ? $"\"issuer\": \"{Issuer}\", " : "";
                 var metadata =
                     "{" +
-                    $"\"issuer\": \"{Issuer}\", \"token_endpoint\": \"{TokenEndpoint}\"" +
+                    issuerPart +
+                    $"\"token_endpoint\": \"{TokenEndpoint}\"" +
                     flag +
                     "}";
 

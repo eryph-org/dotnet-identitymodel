@@ -122,13 +122,24 @@ public sealed class ClientCredentials
                 "Could not read the identity provider's discovery document.", ex);
         }
 
-        var usesIssuerAudience =
+        var advertisesIssuerAudience =
             configuration.AdditionalData.TryGetValue(ClientAssertionAudienceMetadata, out var value)
-            && string.Equals(value?.ToString(), ClientAssertionAudienceIssuer, StringComparison.OrdinalIgnoreCase)
-            && !string.IsNullOrEmpty(configuration.Issuer);
+            && string.Equals(value?.ToString(), ClientAssertionAudienceIssuer, StringComparison.OrdinalIgnoreCase);
 
-        return usesIssuerAudience
-            ? (configuration.Issuer, ClientAuthenticationJwtType)
-            : (_tokenUrl.AbsoluteUri, null);
+        if (advertisesIssuerAudience)
+        {
+            // The server explicitly requires the issuer as the audience, so a discovery document
+            // that advertises this but omits the issuer is invalid and must fail rather than
+            // downgrade to a legacy assertion the server would reject.
+            if (string.IsNullOrEmpty(configuration.Issuer))
+                throw new AccessTokenException(
+                    "The identity provider requires the issuer as the client-assertion audience, " +
+                    "but its discovery document does not contain an issuer.");
+
+            return (configuration.Issuer, ClientAuthenticationJwtType);
+        }
+
+        // Older servers don't advertise the flag and expect the token endpoint as the audience.
+        return (_tokenUrl.AbsoluteUri, null);
     }
 }
