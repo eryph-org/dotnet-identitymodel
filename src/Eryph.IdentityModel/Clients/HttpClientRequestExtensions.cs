@@ -22,14 +22,23 @@ public static class HttpClientExtensions
             PropertyNameCaseInsensitive = true,
         });
 
+    public static Task<AccessTokenResponse> GetClientAccessToken(
+        this HttpClient httpClient,
+        Uri tokenEndpointUrl,
+        string clientName,
+        RSAParameters rsaParameters,
+        IReadOnlyList<string> scopes = null)
+        => httpClient.GetClientAccessToken(
+            tokenEndpointUrl, clientName, rsaParameters, scopes, audience: null, tokenType: null);
+
     public static async Task<AccessTokenResponse> GetClientAccessToken(
         this HttpClient httpClient,
         Uri tokenEndpointUrl,
         string clientName,
         RSAParameters rsaParameters,
-        IReadOnlyList<string> scopes = null,
-        string audience = null,
-        string tokenType = null)
+        IReadOnlyList<string> scopes,
+        string audience,
+        string tokenType)
     {
         if (!tokenEndpointUrl.IsAbsoluteUri)
             throw new AccessTokenException("The token endpoint URL is not an absolute URL.");

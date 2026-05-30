@@ -157,7 +157,7 @@ public class HttpClientExtensionsTests
 
         using var httpClient = new HttpClient(_messageHandlerMock.Object);
         await httpClient.GetClientAccessToken(
-            _tokenUrl, "test-client", _rsaParameters, audience: audience, tokenType: tokenType);
+            _tokenUrl, "test-client", _rsaParameters, scopes: null, audience: audience, tokenType: tokenType);
 
         return new JwtSecurityTokenHandler().ReadJwtToken(capturedAssertion);
     }
