@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Eryph.IdentityModel.Clients;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -16,7 +18,10 @@ namespace Eryph.IdentityModel.Tests;
 
 public class HttpClientExtensionsTests
 {
-    private readonly Uri _tokenUrl = new("https://identity.test/identity/connect/token");
+    private const string Issuer = "https://identity.test/identity";
+    private const string TokenEndpoint = "https://identity.test/identity/connect/token";
+
+    private readonly Uri _tokenUrl = new(TokenEndpoint);
     private readonly Mock<HttpMessageHandler> _messageHandlerMock = new();
     private readonly RSAParameters _rsaParameters;
 
@@ -110,6 +115,51 @@ public class HttpClientExtensionsTests
 
         await act.Should().ThrowAsync<AccessTokenException>()
             .WithMessage("Could not retrieve an access token. The server responded with InternalServerError.");
+    }
+
+    [Fact]
+    public async Task GetClientAccessToken_WithIssuerAudienceAndTokenType_SetsThemOnAssertion()
+    {
+        var assertion = await CaptureAssertion(
+            audience: Issuer, tokenType: "client-authentication+jwt");
+
+        assertion.Audiences.Should().ContainSingle().Which.Should().Be(Issuer);
+        assertion.Header["typ"].Should().Be("client-authentication+jwt");
+        assertion.Issuer.Should().Be("test-client");
+        assertion.Subject.Should().Be("test-client");
+    }
+
+    [Fact]
+    public async Task GetClientAccessToken_WithoutAudience_UsesTokenEndpointAndPlainJwtType()
+    {
+        var assertion = await CaptureAssertion(audience: null, tokenType: null);
+
+        assertion.Audiences.Should().ContainSingle().Which.Should().Be(TokenEndpoint);
+        assertion.Header["typ"].Should().Be("JWT");
+    }
+
+    private async Task<JwtSecurityToken> CaptureAssertion(string audience, string tokenType)
+    {
+        string capturedAssertion = null;
+        _messageHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) =>
+                capturedAssertion = HttpUtility.ParseQueryString(
+                    req.Content.ReadAsStringAsync().GetAwaiter().GetResult())["client_assertion"])
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent("""{ "access_token": "token" }"""),
+            });
+
+        using var httpClient = new HttpClient(_messageHandlerMock.Object);
+        await httpClient.GetClientAccessToken(
+            _tokenUrl, "test-client", _rsaParameters, scopes: null, audience: audience, tokenType: tokenType);
+
+        return new JwtSecurityTokenHandler().ReadJwtToken(capturedAssertion);
     }
 
     private void ArrangeResponse(HttpStatusCode statusCode, string response)
