@@ -1,8 +1,5 @@
 assembly-versioning-scheme: MajorMinor
-mode: ContinuousDeployment
 branches:
-  master:
-    regex: ^master$|^main$
-ignore:
-  sha: []
-merge-message-formats: {}
+  main:
+    deployment-mode: ContinuousDelivery
+    label: ci
